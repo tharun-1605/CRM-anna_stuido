@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
 
@@ -63,104 +63,120 @@ export default function Clients() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Clients</h1>
-        <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-4 py-2 flex items-center text-sm">
-          <Plus className="w-4 h-4 mr-2" /> Add Client
+    <div className="max-w-7xl mx-auto h-full flex flex-col space-y-6 py-4">
+      <div className="flex items-center justify-between mb-2 animate-fade-in-up">
+        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 tracking-tight">Clients</h1>
+        <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all">
+          <Plus className="w-5 h-5 mr-2" /> Add Client
         </button>
       </div>
 
       {isFormOpen && (
-        <div className="app-card p-5 mb-6">
-          <h3 className="font-semibold text-gray-700 mb-4">Add New Client</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="app-card p-8 mb-6 animate-fade-in-up relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+          <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10">Add New Client</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end relative z-10">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Client Name *</label>
-              <input type="text" value={formData.name} onChange={(e)=>setFormData({...formData, name: e.target.value})} className="w-full app-input px-3 py-2 text-sm" />
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Client Name <span className="text-red-500">*</span></label>
+              <input type="text" placeholder="e.g. Acme Corp" value={formData.name} onChange={(e)=>setFormData({...formData, name: e.target.value})} className="w-full app-input px-4 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Email</label>
-              <input type="email" value={formData.email} onChange={(e)=>setFormData({...formData, email: e.target.value})} className="w-full app-input px-3 py-2 text-sm" />
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email</label>
+              <input type="email" placeholder="contact@acme.com" value={formData.email} onChange={(e)=>setFormData({...formData, email: e.target.value})} className="w-full app-input px-4 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Company</label>
-              <input type="text" value={formData.company} onChange={(e)=>setFormData({...formData, company: e.target.value})} className="w-full app-input px-3 py-2 text-sm" />
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Company</label>
+              <input type="text" placeholder="Company Name" value={formData.company} onChange={(e)=>setFormData({...formData, company: e.target.value})} className="w-full app-input px-4 py-2.5 text-sm" />
             </div>
-            <button onClick={handleCreate} className="app-btn-primary px-4 py-2 text-sm w-full">Save Client</button>
+            <button onClick={handleCreate} className="app-btn-primary px-6 py-2.5 text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all w-full">Save Client</button>
           </div>
         </div>
       )}
 
-      <div className="app-card flex-1 overflow-hidden flex flex-col">
-        <div className="border-b border-gray-200 px-4 py-3 flex items-center space-x-4">
-           <div className="w-32">
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-semibold">Type</label>
-              <div className="flex bg-gray-100 rounded p-1">
-                <button className="px-3 py-1 text-xs bg-teal-500 shadow-sm rounded text-white font-medium">Active</button>
-                <button className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 rounded font-medium">Archived</button>
+      <div className="app-card flex-1 overflow-hidden flex flex-col animate-fade-in-up animate-stagger-1 relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-teal-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none opacity-50"></div>
+        
+        <div className="border-b border-gray-100/80 bg-white/50 px-6 py-4 flex items-center space-x-6 relative z-10">
+           <div className="w-48">
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">Status Filter</label>
+              <div className="flex bg-gray-100/80 rounded-lg p-1 shadow-inner">
+                <button className="px-4 py-1.5 text-sm bg-indigo-500 shadow-sm rounded-md text-white font-bold transition-colors w-1/2">Active</button>
+                <button className="px-4 py-1.5 text-sm text-gray-500 hover:text-gray-800 rounded-md font-bold transition-colors w-1/2">Archived</button>
               </div>
            </div>
            <div className="flex-1">
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-semibold">Search client</label>
-              <input type="text" placeholder="Search by client info..." className="app-input w-full px-3 py-1.5 text-xs" />
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">Search Client</label>
+              <input type="text" placeholder="Search by name, email, or company..." className="app-input w-full px-4 py-2 text-sm" />
            </div>
         </div>
         
-        <div className={`flex-1 overflow-auto ${clients.length === 0 ? 'flex flex-col items-center justify-center p-10 bg-[#F9FAFB]' : 'bg-white p-4'}`}>
+        <div className="flex-1 overflow-auto bg-white/40 backdrop-blur-sm p-6 relative z-10">
           {clients.length === 0 ? (
-            <>
-              <svg className="w-40 h-40 mb-6" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="50" y="70" width="80" height="50" rx="8" fill="#1e293b" opacity="0.1"/>
-                <rect x="60" y="80" width="80" height="50" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="2"/>
-                <line x1="75" y1="95" x2="105" y2="95" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/>
-                <rect x="65" y="90" width="3" height="15" fill="#f97316"/>
-              </svg>
-              <h2 className="text-gray-700 font-bold text-lg">No active clients found.</h2>
-            </>
+            <div className="flex flex-col items-center justify-center h-full py-24">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                <Users className="w-10 h-10 text-gray-400" />
+              </div>
+              <h2 className="text-gray-600 font-extrabold text-xl mb-2">No clients found</h2>
+              <p className="text-gray-400 font-medium text-sm">Add a new client to get started tracking projects.</p>
+            </div>
           ) : (
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 border-b border-gray-200">
-                <tr>
-                  <th className="pb-3 font-semibold">Client Name</th>
-                  <th className="pb-3 font-semibold">Company</th>
-                  <th className="pb-3 font-semibold">Email</th>
-                  <th className="pb-3 font-semibold text-center">Status</th><th className="pb-3 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map(c => (
-                   <tr key={c._id} className="border-b border-gray-100 hover:bg-gray-50">
-                      
-                      <td className="py-3 text-gray-800 font-medium">
-                        {editingId === c._id ? <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-2 py-1 text-sm"/> : c.name}
-                      </td>
-                      <td className="py-3 text-gray-600">
-                        {editingId === c._id ? <input type="text" value={editData.company} onChange={e=>setEditData({...editData, company: e.target.value})} className="app-input px-2 py-1 text-sm"/> : (c.company || '-')}
-                      </td>
-                      <td className="py-3 text-gray-600">
-                        {editingId === c._id ? <input type="text" value={editData.email} onChange={e=>setEditData({...editData, email: e.target.value})} className="app-input px-2 py-1 text-sm"/> : (c.email || '-')}
-                      </td>
-                      <td className="py-3 text-center">
-                        <span className="bg-teal-50 text-teal-700 text-xs px-2 py-1 rounded border border-teal-200">{c.status}</span>
-                      </td>
-                      <td className="py-3 text-right">
-                        {editingId === c._id ? (
-                          <>
-                            <button onClick={() => handleUpdate(c._id)} className="text-green-600 font-medium mr-3">Save</button>
-                            <button onClick={() => setEditingId(null)} className="text-gray-500 font-medium">Cancel</button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => startEdit(c)} className="text-teal-600 font-medium mr-3">Edit</button>
-                            <button onClick={() => handleDelete(c._id)} className="text-red-500 font-medium">Delete</button>
-                          </>
-                        )}
-                      </td>
-                   </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-500 bg-gray-50/80 border-b border-gray-200/60 uppercase tracking-wider">
+                  <tr>
+                    <th className="px-6 py-4 font-bold">Client Name</th>
+                    <th className="px-6 py-4 font-bold">Company</th>
+                    <th className="px-6 py-4 font-bold">Email</th>
+                    <th className="px-6 py-4 font-bold text-center">Status</th>
+                    <th className="px-6 py-4 font-bold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {clients.map(c => (
+                     <tr key={c._id} className="hover:bg-teal-50/30 transition-colors group">
+                        
+                        <td className="px-6 py-4">
+                          {editingId === c._id ? (
+                            <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full"/>
+                          ) : (
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-100 to-emerald-100 text-teal-700 flex items-center justify-center font-extrabold mr-3 shadow-sm text-xs">
+                                {c.name.substring(0,2).toUpperCase()}
+                              </div>
+                              <span className="font-bold text-gray-800">{c.name}</span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 font-medium">
+                          {editingId === c._id ? <input type="text" value={editData.company} onChange={e=>setEditData({...editData, company: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full"/> : (c.company || '-')}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {editingId === c._id ? <input type="text" value={editData.email} onChange={e=>setEditData({...editData, email: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full"/> : (
+                            <a href={`mailto:${c.email}`} className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors">{c.email || '-'}</a>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="bg-emerald-50 text-emerald-700 text-xs px-3 py-1.5 rounded-full font-bold border border-emerald-200">{c.status}</span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {editingId === c._id ? (
+                            <div className="flex justify-end space-x-2">
+                              <button onClick={() => handleUpdate(c._id)} className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Save</button>
+                              <button onClick={() => setEditingId(null)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Cancel</button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => startEdit(c)} className="text-indigo-600 hover:text-indigo-800 font-bold transition-colors">Edit</button>
+                              <button onClick={() => handleDelete(c._id)} className="text-red-500 hover:text-red-700 font-bold transition-colors">Delete</button>
+                            </div>
+                          )}
+                        </td>
+                     </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

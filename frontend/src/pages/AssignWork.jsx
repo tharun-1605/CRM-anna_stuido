@@ -87,112 +87,130 @@ export default function AssignWork() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Tasks</h1>
+    <div className="max-w-7xl mx-auto h-full flex flex-col space-y-6 py-4">
+      <div className="flex items-center justify-between mb-2 animate-fade-in-up">
+        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 tracking-tight">Tasks</h1>
         {isAdmin && (
-          <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-4 py-2 flex items-center text-sm">
-            <Plus className="w-4 h-4 mr-2" /> Add Task
+          <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all">
+            <Plus className="w-5 h-5 mr-2" /> Add Task
           </button>
         )}
       </div>
 
       {isFormOpen && (
-        <div className="app-card p-5 mb-6">
-          <h3 className="font-semibold text-gray-700 mb-4">Assign New Task</h3>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div className="app-card p-8 mb-6 animate-fade-in-up relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+          <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10">Assign New Task</h3>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end relative z-10">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Assignee</label>
-              <select value={selectedUser} onChange={(e)=>setSelectedUser(e.target.value)} className="w-full app-input px-2 py-1.5 text-sm">
-                <option value=""></option>
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Assignee</label>
+              <select value={selectedUser} onChange={(e)=>setSelectedUser(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
+                <option value="">Select User</option>
                 {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Project</label>
-              <select value={selectedProject} onChange={(e)=>setSelectedProject(e.target.value)} className="w-full app-input px-2 py-1.5 text-sm">
-                <option value=""></option>
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Project</label>
+              <select value={selectedProject} onChange={(e)=>setSelectedProject(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
+                <option value="">Select Project</option>
                 {projects.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Task Name</label>
-              <input type="text" value={workPackageName} onChange={(e)=>setWorkPackageName(e.target.value)} className="w-full app-input px-2 py-1.5 text-sm" />
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Task Name</label>
+              <input type="text" placeholder="e.g. Design Homepage" value={workPackageName} onChange={(e)=>setWorkPackageName(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Est. Hours</label>
-              <input type="number" step="0.1" value={estimatedHours} onChange={(e)=>setEstimatedHours(e.target.value)} className="w-full app-input px-2 py-1.5 text-sm" />
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Est. Hours</label>
+              <input type="number" step="0.1" placeholder="0.0" value={estimatedHours} onChange={(e)=>setEstimatedHours(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm" />
             </div>
-            <button onClick={handleAssign} className="app-btn-primary px-4 py-1.5 text-sm w-full">Save Task</button>
+            <button onClick={handleAssign} className="app-btn-primary px-6 py-2.5 text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all w-full">Save Task</button>
           </div>
         </div>
       )}
 
       {/* Apploye Tasks Table layout */}
-      <div className="app-card flex-1 overflow-hidden flex flex-col">
+      <div className="app-card flex-1 overflow-hidden flex flex-col animate-fade-in-up animate-stagger-1 relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-teal-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none opacity-50"></div>
         {/* Table Header Controls */}
-        <div className="border-b border-gray-200 px-4 py-3 flex items-center space-x-4">
-           <div className="w-48">
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-semibold">Projects</label>
-              <select className="app-input w-full px-2 py-1.5 text-xs"><option>[All Active Projects]</option></select>
+        <div className="border-b border-gray-100/80 bg-white/50 px-6 py-4 flex items-center space-x-6 relative z-10">
+           <div className="w-64">
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">Projects</label>
+              <select className="app-input w-full px-3 py-2 text-sm"><option>[All Active Projects]</option></select>
            </div>
            <div className="flex-1">
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-semibold">Search Task</label>
-              <input type="text" placeholder="Search by task name..." className="app-input w-full px-3 py-1.5 text-xs" />
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">Search Task</label>
+              <input type="text" placeholder="Search by task name..." className="app-input w-full px-4 py-2 text-sm" />
            </div>
-           <div className="w-32">
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-semibold">Status</label>
-              <select className="app-input w-full px-2 py-1.5 text-xs"><option>To Do</option><option>Completed</option></select>
+           <div className="w-48">
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">Status</label>
+              <select className="app-input w-full px-3 py-2 text-sm"><option>To Do</option><option>Completed</option></select>
            </div>
         </div>
         
         {/* Table Body */}
-        <div className="flex-1 overflow-auto bg-white p-4">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 border-b border-gray-200">
-              <tr>
-                <th className="pb-3 font-semibold">Task Name</th>
-                <th className="pb-3 font-semibold">Project</th>
-                <th className="pb-3 font-semibold">Assignee</th>
-                <th className="pb-3 font-semibold text-center">Status</th><th className="pb-3 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {assignments.map(a => (
-                 <tr key={a._id} className="border-b border-gray-100 hover:bg-gray-50">
-                    
-                      <td className="py-3 text-gray-800 font-medium">
-                        {editingId === a._id ? <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-2 py-1 text-sm"/> : a.name}
+        <div className="flex-1 overflow-auto bg-white/40 backdrop-blur-sm p-6 relative z-10">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-gray-500 bg-gray-50/80 border-b border-gray-200/60 uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4 font-bold">Task Name</th>
+                  <th className="px-6 py-4 font-bold">Project</th>
+                  <th className="px-6 py-4 font-bold">Assignee</th>
+                  <th className="px-6 py-4 font-bold text-center">Status</th>
+                  <th className="px-6 py-4 font-bold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {assignments.map(a => (
+                   <tr key={a._id} className="hover:bg-teal-50/30 transition-colors group">
+                      
+                        <td className="px-6 py-4 text-gray-800 font-bold">
+                          {editingId === a._id ? <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full"/> : a.name}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 font-semibold">{a.project?.name}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-extrabold text-[10px] mr-2">
+                              {a.user?.name ? a.user.name.substring(0,2).toUpperCase() : '?'}
+                            </div>
+                            <span className="font-bold text-gray-700">{a.user?.name || 'Unassigned'}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1.5 rounded-full font-bold border border-gray-200">{a.status}</span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {editingId === a._id ? (
+                            <div className="flex justify-end space-x-2">
+                              <button onClick={() => handleUpdate(a._id)} className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Save</button>
+                              <button onClick={() => setEditingId(null)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Cancel</button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => startEdit(a)} className="text-indigo-600 hover:text-indigo-800 font-bold transition-colors">Edit</button>
+                              <button onClick={() => handleDelete(a._id)} className="text-red-500 hover:text-red-700 font-bold transition-colors">Delete</button>
+                            </div>
+                          )}
+                        </td>
+                   </tr>
+                ))}
+                {assignments.length === 0 && (
+                   <tr>
+                      <td colSpan="5" className="text-center py-24">
+                        <div className="flex flex-col items-center justify-center">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                          </div>
+                          <p className="text-gray-500 font-bold">No tasks found.</p>
+                        </div>
                       </td>
-                      <td className="py-3 text-gray-600">{a.project?.name}</td>
-                      <td className="py-3 text-gray-600">{a.user?.name}</td>
-                      <td className="py-3 text-center">
-                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">{a.status}</span>
-                      </td>
-                      <td className="py-3 text-right">
-                        {editingId === a._id ? (
-                          <>
-                            <button onClick={() => handleUpdate(a._id)} className="text-green-600 font-medium mr-3">Save</button>
-                            <button onClick={() => setEditingId(null)} className="text-gray-500 font-medium">Cancel</button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => startEdit(a)} className="text-teal-600 font-medium mr-3">Edit</button>
-                            <button onClick={() => handleDelete(a._id)} className="text-red-500 font-medium">Delete</button>
-                          </>
-                        )}
-                      </td>
-                 </tr>
-              ))}
-              {assignments.length === 0 && (
-                 <tr>
-                    <td colSpan="4" className="text-center py-20">
-                      <p className="text-gray-500 font-medium">No tasks found.</p>
-                    </td>
-                 </tr>
-              )}
-            </tbody>
-          </table>
+                   </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

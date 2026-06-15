@@ -6,25 +6,55 @@ import toast from 'react-hot-toast';
 export default function Payroll() {
   const [payrolls, setPayrolls] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRunning, setIsRunning] = useState(false);
+
+  // We'll use current month/year for simplicity
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+
+  const fetchPayrolls = async () => {
+    try {
+      const { data } = await axios.get(`/payrolls?month=${currentMonth}&year=${currentYear}`);
+      setPayrolls(data);
+    } catch (error) {
+      toast.error('Failed to load payrolls');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchPayrolls();
   }, []);
 
-  const fetchPayrolls = async () => {
+  const handleRunPayroll = async () => {
+    if (!window.confirm(`Run payroll for ${getMonthName(currentMonth)} ${currentYear}?`)) return;
+    setIsRunning(true);
     try {
-      // In a real implementation this would fetch from /payrolls
-      setTimeout(() => {
-        setPayrolls([
-          { _id: '1', user: { name: 'John Doe', email: 'john@example.com' }, month: 6, year: 2026, basicSalary: 5000, netPay: 4800, status: 'Paid' },
-          { _id: '2', user: { name: 'Jane Smith', email: 'jane@example.com' }, month: 6, year: 2026, basicSalary: 6000, netPay: 5800, status: 'Pending' },
-        ]);
-        setIsLoading(false);
-      }, 500);
+      await axios.post('/payrolls/run', { month: currentMonth, year: currentYear });
+      toast.success('Payroll calculated successfully');
+      fetchPayrolls();
     } catch (error) {
-      toast.error('Failed to load payrolls');
-      setIsLoading(false);
+      toast.error(error.response?.data?.message || 'Failed to run payroll');
+    } finally {
+      setIsRunning(false);
     }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await axios.put(`/payrolls/${id}/status`, { status: newStatus });
+      toast.success('Status updated');
+      fetchPayrolls();
+    } catch (error) {
+      toast.error('Failed to update status');
+    }
+  };
+
+  const getMonthName = (monthNum) => {
+    const date = new Date();
+    date.setMonth(monthNum - 1);
+    return date.toLocaleString('default', { month: 'long' });
   };
 
   const getStatusBadge = (status) => {
@@ -38,9 +68,14 @@ export default function Payroll() {
     }
   };
 
+  // Calculate summary stats
+  const totalProcessed = payrolls.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.netPay, 0);
+  const pendingCount = payrolls.filter(p => p.status === 'Pending').length;
+  const payslipsGenerated = payrolls.length;
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="max-w-7xl mx-auto h-full flex flex-col space-y-6">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Payroll Processing</h1>
           <p className="text-sm text-gray-500 mt-1">Manage employee salaries and view payment history</p>
@@ -50,21 +85,25 @@ export default function Payroll() {
              <FileText className="w-4 h-4 mr-2" />
              Export Report
            </button>
-           <button className="app-btn-primary flex items-center px-4 py-2">
+           <button 
+             onClick={handleRunPayroll}
+             disabled={isRunning}
+             className="app-btn-primary flex items-center px-4 py-2 disabled:opacity-50"
+           >
              <DollarSign className="w-4 h-4 mr-2" />
-             Run Payroll
+             {isRunning ? 'Running...' : 'Run Payroll'}
            </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex items-center">
            <div className="w-12 h-12 rounded-full bg-teal-50 flex items-center justify-center mr-4">
               <DollarSign className="w-6 h-6 text-teal-600" />
            </div>
            <div>
-             <p className="text-sm text-gray-500 font-medium">Total Processed (June)</p>
-             <h3 className="text-2xl font-bold text-gray-800">$10,600</h3>
+             <p className="text-sm text-gray-500 font-medium">Total Paid ({getMonthName(currentMonth)})</p>
+             <h3 className="text-2xl font-bold text-gray-800">${totalProcessed.toLocaleString()}</h3>
            </div>
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex items-center">
@@ -73,7 +112,7 @@ export default function Payroll() {
            </div>
            <div>
              <p className="text-sm text-gray-500 font-medium">Pending Payments</p>
-             <h3 className="text-2xl font-bold text-gray-800">1</h3>
+             <h3 className="text-2xl font-bold text-gray-800">{pendingCount}</h3>
            </div>
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex items-center">
@@ -82,16 +121,16 @@ export default function Payroll() {
            </div>
            <div>
              <p className="text-sm text-gray-500 font-medium">Payslips Generated</p>
-             <h3 className="text-2xl font-bold text-gray-800">2</h3>
+             <h3 className="text-2xl font-bold text-gray-800">{payslipsGenerated}</h3>
            </div>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex-1 overflow-hidden flex flex-col">
+        <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+            <thead className="sticky top-0 bg-gray-50 z-10">
+              <tr className="border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
                 <th className="px-6 py-4 font-medium">Employee</th>
                 <th className="px-6 py-4 font-medium">Period</th>
                 <th className="px-6 py-4 font-medium">Basic Salary</th>
@@ -103,23 +142,32 @@ export default function Payroll() {
             <tbody className="text-sm divide-y divide-gray-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">Loading payroll data...</td>
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mr-2"></div>
+                      Loading payroll data...
+                    </div>
+                  </td>
                 </tr>
               ) : payrolls.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No payroll records found</td>
+                  <td colSpan="6" className="px-6 py-12 text-center">
+                    <DollarSign className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 font-medium">No payroll records found for this month.</p>
+                    <p className="text-gray-400 text-xs mt-1">Click "Run Payroll" to generate payslips based on tracked time.</p>
+                  </td>
                 </tr>
               ) : (
                 payrolls.map((payroll) => (
                   <tr key={payroll._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-800">{payroll.user.name}</div>
-                      <div className="text-xs text-gray-500">{payroll.user.email}</div>
+                      <div className="font-medium text-gray-800">{payroll.user?.name || 'Unknown'}</div>
+                      <div className="text-xs text-gray-500">{payroll.user?.email || ''}</div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">June 2026</td>
-                    <td className="px-6 py-4 text-gray-600">${payroll.basicSalary.toLocaleString()}</td>
-                    <td className="px-6 py-4 font-medium text-gray-800">${payroll.netPay.toLocaleString()}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-gray-600">{getMonthName(payroll.month)} {payroll.year}</td>
+                    <td className="px-6 py-4 text-gray-600">${payroll.basicSalary.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td className="px-6 py-4 font-medium text-gray-800">${payroll.netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td className="px-6 py-4 cursor-pointer" onClick={() => handleStatusChange(payroll._id, payroll.status === 'Paid' ? 'Pending' : 'Paid')} title="Click to toggle status">
                       {getStatusBadge(payroll.status)}
                     </td>
                     <td className="px-6 py-4">

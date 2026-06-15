@@ -13,6 +13,7 @@ import organizationRoutes from './routes/organizationRoutes.js';
 import payrollRoutes from './routes/payrollRoutes.js';
 import liveRoutes from './routes/liveRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/organizations', organizationRoutes);
 app.use('/api/payrolls', payrollRoutes);
 app.use('/api/live', liveRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

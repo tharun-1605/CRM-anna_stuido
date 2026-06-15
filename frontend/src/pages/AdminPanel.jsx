@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
+import { UserPlus, KeyRound, Users } from 'lucide-react';
 
 export default function AdminPanel() {
   const [users, setUsers] = useState([]);
@@ -81,103 +82,132 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Members</h1>
+    <div className="max-w-6xl mx-auto h-full flex flex-col space-y-8 py-4">
+      <div className="flex items-center justify-between animate-fade-in-up">
+        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 tracking-tight">
+          Team Management
+        </h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Create User Form */}
-        <div className="app-card p-6">
-          <h3 className="font-semibold text-gray-700 mb-4 border-b border-gray-100 pb-2">Invite / Create Member</h3>
-          <div className="space-y-4">
+        <div className="app-card p-8 animate-fade-in-up animate-stagger-1 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+          <h3 className="font-bold text-gray-800 text-xl mb-6 flex items-center relative z-10">
+            <UserPlus className="w-6 h-6 mr-3 text-teal-500" /> Invite / Create Member
+          </h3>
+          <div className="space-y-5 relative z-10">
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Email / User ID</label>
-              <input type="text" value={newUserId} onChange={(e) => setNewUserId(e.target.value)} className="w-full app-input px-3 py-2 text-sm" />
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email / User ID</label>
+              <input type="text" value={newUserId} onChange={(e) => setNewUserId(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm" placeholder="jane@company.com" />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Display Name</label>
-              <input type="text" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} className="w-full app-input px-3 py-2 text-sm" />
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Display Name</label>
+              <input type="text" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm" placeholder="Jane Doe" />
             </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Role</label>
-              <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value)} className="w-full app-input px-3 py-2 text-sm">
-                <option value="Employee">User</option>
-                <option value="Manager">Manager</option>
-                <option value="Admin">Admin</option>
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Role</label>
+                <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
+                  <option value="Employee">User</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Password</label>
+                <input type="password" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm" placeholder="••••••••" />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Password</label>
-              <input type="password" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} className="w-full app-input px-3 py-2 text-sm" />
-            </div>
-            <button onClick={handleCreateUser} className="app-btn-primary w-full py-2 text-sm mt-4">
+            <button onClick={handleCreateUser} className="app-btn-primary w-full py-3 text-sm mt-4 shadow-lg hover:shadow-teal-500/25">
               Add Member
             </button>
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Reset Password */}
-          <div className="app-card p-6">
-            <h3 className="font-semibold text-gray-700 mb-4 border-b border-gray-100 pb-2">Reset Member Password</h3>
-            <div className="space-y-4">
+          <div className="app-card p-8 animate-fade-in-up animate-stagger-2 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <h3 className="font-bold text-gray-800 text-xl mb-6 flex items-center relative z-10">
+              <KeyRound className="w-6 h-6 mr-3 text-orange-500" /> Reset Password
+            </h3>
+            <div className="space-y-5 relative z-10">
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Select Member</label>
-                <select value={resetUserId} onChange={(e) => setResetUserId(e.target.value)} className="w-full app-input px-3 py-2 text-sm">
-                  <option value=""></option>
+                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Select Member</label>
+                <select value={resetUserId} onChange={(e) => setResetUserId(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
+                  <option value="">-- Select --</option>
                   {(users || []).map(u => <option key={u._id} value={u._id}>{u.name} ({u.email})</option>)}
                 </select>
               </div>
-              <button onClick={handleResetPassword} className="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 w-full py-2 rounded font-medium text-sm transition-colors">
-                Reset Password
+              <button onClick={handleResetPassword} className="bg-gradient-to-r from-red-50 to-orange-50 text-red-600 hover:from-red-100 hover:to-orange-100 border border-red-200 w-full py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-red-500/10">
+                Force Reset Password
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 app-card p-6">
-        <h3 className="font-semibold text-gray-700 mb-4 border-b border-gray-100 pb-2">All Members</h3>
+      <div className="app-card p-0 overflow-hidden flex flex-col animate-fade-in-up animate-stagger-3 relative">
+        <div className="p-6 border-b border-gray-100/50 bg-white/50 flex items-center justify-between">
+          <h3 className="font-bold text-gray-800 text-xl flex items-center">
+             <Users className="w-6 h-6 mr-3 text-indigo-500" /> Directory
+          </h3>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 border-b border-gray-200">
+            <thead className="text-xs text-gray-500 bg-gray-50/80 border-b border-gray-200/60 uppercase tracking-wider">
               <tr>
-                <th className="pb-3 font-semibold">Name</th>
-                <th className="pb-3 font-semibold">Email</th>
-                <th className="pb-3 font-semibold">Role</th>
-                <th className="pb-3 font-semibold text-right">Actions</th>
+                <th className="px-6 py-4 font-bold">Name</th>
+                <th className="px-6 py-4 font-bold">Email</th>
+                <th className="px-6 py-4 font-bold">Role</th>
+                <th className="px-6 py-4 font-bold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100">
               {(users || []).map(u => (
-                <tr key={u._id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 text-gray-800 font-medium">
+                <tr key={u._id} className="hover:bg-teal-50/30 transition-colors group">
+                  <td className="px-6 py-4 text-gray-800 font-bold">
                     {editingUserId === u._id ? (
-                      <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="app-input px-2 py-1 text-sm" />
-                    ) : u.name}
+                      <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="app-input px-3 py-1.5 text-sm" />
+                    ) : (
+                      <div className="flex items-center space-x-3">
+                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                           {u.name.substring(0,2).toUpperCase()}
+                         </div>
+                         <span>{u.name}</span>
+                      </div>
+                    )}
                   </td>
-                  <td className="py-3 text-gray-600">{u.email}</td>
-                  <td className="py-3 text-gray-600">
+                  <td className="px-6 py-4 text-gray-600 font-medium">{u.email}</td>
+                  <td className="px-6 py-4">
                     {editingUserId === u._id ? (
-                      <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="app-input px-2 py-1 text-sm">
+                      <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="app-input px-3 py-1.5 text-sm">
                         <option value="Employee">Employee</option>
                         <option value="Manager">Manager</option>
                         <option value="Admin">Admin</option>
                       </select>
-                    ) : u.role}
-                  </td>
-                  <td className="py-3 text-right">
-                    {editingUserId === u._id ? (
-                      <>
-                        <button onClick={() => handleUpdateUser(u._id)} className="text-green-600 hover:text-green-800 font-medium mr-3">Save</button>
-                        <button onClick={() => setEditingUserId(null)} className="text-gray-500 hover:text-gray-700 font-medium">Cancel</button>
-                      </>
                     ) : (
-                      <>
-                        <button onClick={() => startEditUser(u)} className="text-teal-600 hover:text-teal-800 font-medium mr-3">Edit</button>
-                        <button onClick={() => handleDeleteUser(u._id)} className="text-red-500 hover:text-red-700 font-medium">Delete</button>
-                      </>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        u.role === 'Admin' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                        u.role === 'Manager' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                        'bg-gray-100 text-gray-700 border border-gray-200'
+                      }`}>
+                        {u.role}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    {editingUserId === u._id ? (
+                      <div className="flex justify-end space-x-2">
+                        <button onClick={() => handleUpdateUser(u._id)} className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Save</button>
+                        <button onClick={() => setEditingUserId(null)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => startEditUser(u)} className="text-teal-600 hover:text-teal-800 font-bold text-sm transition-colors">Edit</button>
+                        <button onClick={() => handleDeleteUser(u._id)} className="text-red-500 hover:text-red-700 font-bold text-sm transition-colors">Delete</button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -186,7 +216,6 @@ export default function AdminPanel() {
           </table>
         </div>
       </div>
-
     </div>
   );
 }
