@@ -101,3 +101,25 @@ export const updatePayrollStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Update payroll basic salary and net pay
+// @route   PUT /api/payrolls/:id
+export const updatePayroll = async (req, res) => {
+  try {
+    const { basicSalary } = req.body;
+    const payroll = await Payroll.findById(req.params.id);
+    
+    if (!payroll) {
+      return res.status(404).json({ message: 'Payroll not found' });
+    }
+
+    payroll.basicSalary = basicSalary;
+    payroll.netPay = basicSalary; // Assuming basic salary is net pay for now
+    await payroll.save();
+    
+    await payroll.populate('user', 'name email');
+    res.json(payroll);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
