@@ -34,6 +34,34 @@ export default function Projects() {
     fetchData();
   }, []);
 
+  
+  const handleDelete = async (id) => {
+    if(!window.confirm('Delete this project?')) return;
+    try {
+      await axios.delete(`/projects/${id}`);
+      toast.success('Project deleted');
+      fetchProjects();
+    } catch(err) { toast.error('Failed to delete project'); }
+  };
+
+
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({ name: '', description: '' });
+  
+  const startEdit = (p) => {
+    setEditingId(p._id);
+    setEditData({ name: p.name, description: p.description || '' });
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      await axios.put(`/projects/${id}`, editData);
+      toast.success('Project updated');
+      setEditingId(null);
+      fetchProjects();
+    } catch(err) { toast.error('Failed to update project'); }
+  };
+
   const handleCreate = async () => {
     if (!formData.name) return toast.error('Project Name is required');
     try {

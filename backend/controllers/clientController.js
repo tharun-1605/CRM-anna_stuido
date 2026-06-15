@@ -18,3 +18,19 @@ export const createClient = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+
+export const updateClient = async (req, res) => {
+  try {
+    const client = await Client.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(client);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+export const deleteClient = async (req, res) => {
+  try {
+    const client = await Client.findById(req.params.id);
+    if (!client) return res.status(404).json({ message: 'Not found' });
+    await client.deleteOne();
+    res.json({ message: 'Deleted' });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};

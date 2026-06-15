@@ -39,6 +39,34 @@ export default function AssignWork() {
     fetchData();
   }, []);
 
+  
+  const handleDelete = async (id) => {
+    if(!window.confirm('Delete this task?')) return;
+    try {
+      await axios.delete(`/work/${id}`);
+      toast.success('Task deleted');
+      fetchData();
+    } catch(err) { toast.error('Failed to delete task'); }
+  };
+
+
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({ name: '', estimatedHours: 0 });
+  
+  const startEdit = (t) => {
+    setEditingId(t._id);
+    setEditData({ name: t.name, estimatedHours: t.estimatedHours || 0 });
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      await axios.put(`/work/${id}`, editData);
+      toast.success('Task updated');
+      setEditingId(null);
+      fetchData();
+    } catch(err) { toast.error('Failed to update task'); }
+  };
+
   const handleAssign = async () => {
     if (!selectedUser || !selectedProject || !workPackageName || !estimatedHours) {
       return toast.error('Fill all required fields');
@@ -126,18 +154,30 @@ export default function AssignWork() {
                 <th className="pb-3 font-semibold">Task Name</th>
                 <th className="pb-3 font-semibold">Project</th>
                 <th className="pb-3 font-semibold">Assignee</th>
-                <th className="pb-3 font-semibold text-center">Status</th>
+                <th className="pb-3 font-semibold text-center">Status</th><th className="pb-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {assignments.map(a => (
                  <tr key={a._id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 text-gray-800 font-medium">{a.name}</td>
-                    <td className="py-3 text-gray-600">{a.project?.name}</td>
-                    <td className="py-3 text-gray-600">{a.user?.name}</td>
-                    <td className="py-3 text-center">
-                      <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">{a.status}</span>
-                    </td>
+                    
+                      <td className="py-3 text-gray-800 font-medium">
+                        {editingId === a._id ? <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-2 py-1 text-sm"/> : a.name}
+                      </td>
+                      <td className="py-3 text-gray-600">{a.project?.name}</td>
+                      <td className="py-3 text-right">
+                        {editingId === a._id ? (
+                          <>
+                            <button onClick={() => handleUpdate(a._id)} className="text-green-600 font-medium mr-3">Save</button>
+                            <button onClick={() => setEditingId(null)} className="text-gray-500 font-medium">Cancel</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startEdit(a)} className="text-teal-600 font-medium mr-3">Edit</button>
+                            <button onClick={() => handleDelete(a._id)} className="text-red-500 font-medium">Delete</button>
+                          </>
+                        )}
+                      </td>
                  </tr>
               ))}
               {assignments.length === 0 && (

@@ -12,6 +12,7 @@ import teamRoutes from './routes/teamRoutes.js';
 import organizationRoutes from './routes/organizationRoutes.js';
 import payrollRoutes from './routes/payrollRoutes.js';
 import liveRoutes from './routes/liveRoutes.js';
+import attendanceRoutes from './routes/attendanceRoutes.js';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/payrolls', payrollRoutes);
 app.use('/api/live', liveRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

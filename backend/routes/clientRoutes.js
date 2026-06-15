@@ -1,9 +1,10 @@
 import express from 'express';
-import { getClients, createClient } from '../controllers/clientController.js';
+import { getClients, createClient, updateClient, deleteClient } from '../controllers/clientController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/').get(protect, getClients).post(protect, createClient);
 
+router.route('/:id').put(protect, updateClient).delete(protect, deleteClient);
 export default router;

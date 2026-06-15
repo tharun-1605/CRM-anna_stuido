@@ -1,5 +1,5 @@
 import express from 'express';
-import { assignWork, getAllWork, getMyWork, addTimeLog } from '../controllers/workController.js';
+import { assignWork, getAllWork, getMyWork, addTimeLog, updateWorkPackage, deleteWorkPackage } from '../controllers/workController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -11,4 +11,5 @@ router.route('/')
 router.get('/me', protect, getMyWork);
 router.post('/:id/log', protect, addTimeLog);
 
+router.route('/:id').put(protect, updateWorkPackage).delete(protect, admin, deleteWorkPackage);
 export default router;

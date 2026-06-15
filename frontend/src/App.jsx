@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
+import useTimerStore from './store/timerStore';
+import useAttendanceStore from './store/attendanceStore';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -19,6 +22,7 @@ import Organizations from './pages/Organizations';
 import Payroll from './pages/Payroll';
 import LiveFeed from './pages/LiveFeed';
 import Reports from './pages/Reports';
+import Attendance from './pages/Attendance';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -33,6 +37,7 @@ function AnimatedRoutes() {
             <Route path="leave-approval" element={<PageTransition><LeaveRequests /></PageTransition>} />
             <Route path="leave-request" element={<PageTransition><LeaveRequests /></PageTransition>} />
             <Route path="screenshots" element={<PageTransition><ScreenshotViewer /></PageTransition>} />
+            <Route path="attendance" element={<PageTransition><Attendance /></PageTransition>} />
             <Route path="projects" element={<PageTransition><Projects /></PageTransition>} />
             <Route path="assign-work" element={<PageTransition><AssignWork /></PageTransition>} />
             <Route path="work-packages" element={<PageTransition><WorkPackages /></PageTransition>} />
@@ -55,6 +60,41 @@ function AnimatedRoutes() {
 }
 
 function App() {
+  const { isTracking } = useTimerStore();
+  const { todayRecord, fetchToday } = useAttendanceStore();
+
+  useEffect(() => {
+    // Attempt to fetch today's record once on load
+    fetchToday();
+    
+    const handleBeforeUnload = (e) => {
+      let preventClose = false;
+
+      // Rule 1: Cannot close if task screen recording is actively running
+      if (isTracking) {
+        preventClose = true;
+      } else if (todayRecord) {
+        // Rule 2: Cannot close if clocked in and actively working (not on break and not clocked out)
+        const isClockedIn = !!todayRecord.clockIn;
+        const isClockedOut = !!todayRecord.clockOut;
+        const isOnBreak = !!(todayRecord.breaks && todayRecord.breaks.find(b => !b.endTime));
+
+        if (isClockedIn && !isClockedOut && !isOnBreak) {
+          preventClose = true;
+        }
+      }
+
+      if (preventClose) {
+        e.preventDefault();
+        e.returnValue = ''; // Standard way to trigger browser confirmation dialog
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isTracking, todayRecord]);
+
   return (
     <BrowserRouter>
       <Toaster position="top-right" toastOptions={{ style: { background: '#333', color: '#fff' } }} />

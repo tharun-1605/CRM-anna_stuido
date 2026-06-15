@@ -3,7 +3,7 @@ import useAuthStore from '../store/authStore';
 import { 
   Star, LayoutDashboard, Radio, Laptop, Clock, FileText, 
   CheckSquare, Calendar, LogIn, Plane, FolderKanban, Receipt, Users, 
-  UsersRound, Settings, Blocks, Building2, UserPlus, HelpCircle
+  UsersRound, Settings, Blocks, Building2, UserPlus, HelpCircle, UserCheck
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -57,16 +57,25 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-y-auto pb-4 custom-scrollbar">
         <NavSection title="Analyze" />
         <NavItem to="/" icon={LayoutDashboard} text="Dashboard" />
-        <NavItem to="/live" icon={Radio} text="Live Feed" />
-        <NavItem to="/work-packages" icon={Clock} text="Timesheets" />
-        <NavItem to="/reports" icon={FileText} text="Reports" />
+        {user?.role === 'Admin' && (
+          <>
+            <NavItem to="/live" icon={Radio} text="Live Feed" />
+            <NavItem to="/work-packages" icon={Clock} text="Timesheets" />
+            <NavItem to="/reports" icon={FileText} text="Reports" />
+          </>
+        )}
 
         <NavSection title="Manage" />
+        <NavItem to="/attendance" icon={UserCheck} text="Attendance" badge="NEW" />
         <NavItem to="/assign-work" icon={CheckSquare} text="Tasks" />
-        <NavItem to="/leave-request" icon={Calendar} text="Attendance" />
+        <NavItem to="/leave-request" icon={Calendar} text="Leave Request" />
         <NavItem to="/projects" icon={FolderKanban} text="Projects" />
-        <NavItem to="/invoice" icon={Receipt} text="Invoice" />
-        <NavItem to="/clients" icon={UsersRound} text="Clients" badge="NEW" />
+        {user?.role === 'Admin' && (
+          <>
+            <NavItem to="/invoice" icon={Receipt} text="Invoice" />
+            <NavItem to="/clients" icon={UsersRound} text="Clients" badge="NEW" />
+          </>
+        )}
 
         {user?.role === 'Admin' && (
           <>

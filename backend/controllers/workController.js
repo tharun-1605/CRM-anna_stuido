@@ -82,3 +82,19 @@ export const addTimeLog = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const updateWorkPackage = async (req, res) => {
+  try {
+    const work = await WorkPackage.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(work);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+export const deleteWorkPackage = async (req, res) => {
+  try {
+    const work = await WorkPackage.findById(req.params.id);
+    if (!work) return res.status(404).json({ message: 'Not found' });
+    await work.deleteOne();
+    res.json({ message: 'Deleted' });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
