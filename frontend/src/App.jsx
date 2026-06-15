@@ -23,6 +23,7 @@ import Payroll from './pages/Payroll';
 import LiveFeed from './pages/LiveFeed';
 import Reports from './pages/Reports';
 import Attendance from './pages/Attendance';
+import Integrations from './pages/Integrations';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -48,7 +49,7 @@ function AnimatedRoutes() {
           <Route path="reports" element={<Reports />} />
           <Route path="invoice" element={<GenericPlaceholder title="Invoices" />} />
           <Route path="payroll" element={<Payroll />} />
-          <Route path="integrations" element={<GenericPlaceholder title="Integrations" />} />
+          <Route path="integrations" element={<Integrations />} />
           <Route path="organizations" element={<Organizations />} />
           <Route path="settings" element={<GenericPlaceholder title="Settings" />} />
         </Route>

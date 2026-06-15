@@ -13,23 +13,28 @@ export default function AssignWork() {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   // Form State
+  const [assignToType, setAssignToType] = useState('User');
   const [selectedUser, setSelectedUser] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
   const [workPackageName, setWorkPackageName] = useState('');
   const [estimatedHours, setEstimatedHours] = useState('');
+  const [teams, setTeams] = useState([]);
 
   const fetchData = async () => {
     try {
       const endpoint = isAdmin ? '/work' : '/work/me';
       const userResPromise = isAdmin ? axios.get('/auth/users') : Promise.resolve({ data: [] });
-      const [uRes, pRes, wRes] = await Promise.all([
+      const [uRes, pRes, wRes, tRes] = await Promise.all([
         userResPromise,
         axios.get('/projects'),
-        axios.get(endpoint)
+        axios.get(endpoint),
+        isAdmin ? axios.get('/teams') : Promise.resolve({ data: [] })
       ]);
       setUsers(uRes.data || []);
       setProjects(pRes.data);
       setAssignments(wRes.data);
+      setTeams(tRes.data || []);
     } catch (err) {
       toast.error('Failed to fetch data');
     }
@@ -68,18 +73,27 @@ export default function AssignWork() {
   };
 
   const handleAssign = async () => {
-    if (!selectedUser || !selectedProject || !workPackageName || !estimatedHours) {
+    if ((assignToType === 'User' && !selectedUser) || (assignToType === 'Team' && !selectedTeam) || !selectedProject || !workPackageName || !estimatedHours) {
       return toast.error('Fill all required fields');
     }
     try {
-      await axios.post('/work', {
-        user: selectedUser,
+      const payload = {
         project: selectedProject,
         name: workPackageName,
         estimatedHours: Number(estimatedHours)
-      });
+      };
+      
+      if (assignToType === 'User') {
+        payload.user = selectedUser;
+      } else {
+        payload.team = selectedTeam;
+      }
+
+      await axios.post('/work', payload);
       toast.success('Task Assigned Successfully');
       setIsFormOpen(false);
+      setWorkPackageName('');
+      setEstimatedHours('');
       fetchData();
     } catch (err) {
       toast.error('Failed to assign task');
@@ -101,14 +115,32 @@ export default function AssignWork() {
         <div className="app-card p-8 mb-6 animate-fade-in-up relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
           <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10">Assign New Task</h3>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-end relative z-10">
             <div>
-              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Assignee</label>
-              <select value={selectedUser} onChange={(e)=>setSelectedUser(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
-                <option value="">Select User</option>
-                {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Assign To</label>
+              <select value={assignToType} onChange={(e)=>setAssignToType(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm font-bold text-teal-700">
+                <option value="User">Single User</option>
+                <option value="Team">Entire Team</option>
               </select>
             </div>
+            
+            {assignToType === 'User' ? (
+              <div>
+                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Select User</label>
+                <select value={selectedUser} onChange={(e)=>setSelectedUser(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
+                  <option value="">Select User</option>
+                  {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Select Team</label>
+                <select value={selectedTeam} onChange={(e)=>setSelectedTeam(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
+                  <option value="">Select Team</option>
+                  {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                </select>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Project</label>
               <select value={selectedProject} onChange={(e)=>setSelectedProject(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">

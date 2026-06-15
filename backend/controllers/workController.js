@@ -1,18 +1,39 @@
 import WorkPackage from '../models/WorkPackage.js';
 import TimeLog from '../models/TimeLog.js';
+import Team from '../models/Team.js';
 
-// @desc    Assign work to user (Admin)
+// @desc    Assign work to user or team (Admin)
 // @route   POST /api/work
 export const assignWork = async (req, res) => {
   try {
-    const { user, project, name, estimatedHours } = req.body;
-    const workPackage = await WorkPackage.create({
-      user,
-      project,
-      name,
-      estimatedHours
-    });
-    res.status(201).json(workPackage);
+    const { user, team, project, name, estimatedHours } = req.body;
+    
+    if (team) {
+      const teamDoc = await Team.findById(team);
+      if (!teamDoc) return res.status(404).json({ message: 'Team not found' });
+      
+      const workPackages = await Promise.all(
+        teamDoc.members.map(memberId => 
+          WorkPackage.create({
+            user: memberId,
+            project,
+            name,
+            estimatedHours
+          })
+        )
+      );
+      return res.status(201).json({ message: 'Tasks assigned to team members', count: workPackages.length });
+    } else if (user) {
+      const workPackage = await WorkPackage.create({
+        user,
+        project,
+        name,
+        estimatedHours
+      });
+      return res.status(201).json(workPackage);
+    } else {
+      return res.status(400).json({ message: 'Please provide either user or team to assign work to.' });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
