@@ -15,6 +15,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 import GenericPlaceholder from './pages/GenericPlaceholder';
 import Clients from './pages/Clients';
 import Teams from './pages/Teams';
+import Organizations from './pages/Organizations';
+import Payroll from './pages/Payroll';
+import LiveFeed from './pages/LiveFeed';
+import Reports from './pages/Reports';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -36,13 +40,12 @@ function AnimatedRoutes() {
             <Route path="clients" element={<PageTransition><Clients /></PageTransition>} />
             <Route path="customers" element={<PageTransition><Clients /></PageTransition>} />
             <Route path="teams" element={<PageTransition><Teams /></PageTransition>} />
-            <Route path="live" element={<PageTransition><GenericPlaceholder title="Live Feed" /></PageTransition>} />
-            <Route path="remote" element={<PageTransition><GenericPlaceholder title="RemoteTrack" /></PageTransition>} />
-            <Route path="reports" element={<PageTransition><GenericPlaceholder title="Reports" /></PageTransition>} />
+            <Route path="live" element={<PageTransition><LiveFeed /></PageTransition>} />
+            <Route path="reports" element={<PageTransition><Reports /></PageTransition>} />
             <Route path="invoice" element={<PageTransition><GenericPlaceholder title="Invoices" /></PageTransition>} />
-            <Route path="payroll" element={<PageTransition><GenericPlaceholder title="Payroll" /></PageTransition>} />
+            <Route path="payroll" element={<PageTransition><Payroll /></PageTransition>} />
             <Route path="integrations" element={<PageTransition><GenericPlaceholder title="Integrations" /></PageTransition>} />
-            <Route path="organizations" element={<PageTransition><GenericPlaceholder title="Organizations" /></PageTransition>} />
+            <Route path="organizations" element={<PageTransition><Organizations /></PageTransition>} />
             <Route path="settings" element={<PageTransition><GenericPlaceholder title="Settings" /></PageTransition>} />
           </Route>
         </Route>

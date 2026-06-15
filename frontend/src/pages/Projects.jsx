@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
+import useAuthStore from '../store/authStore';
 
 export default function Projects() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'Admin';
   const [projects, setProjects] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [expandedRows, setExpandedRows] = useState(new Set());
@@ -15,9 +18,10 @@ export default function Projects() {
 
   const fetchData = async () => {
     try {
+      const endpoint = isAdmin ? '/work' : '/work/me';
       const [pRes, aRes] = await Promise.all([
         axios.get('/projects'),
-        axios.get('/work')
+        axios.get(endpoint)
       ]);
       setProjects(pRes.data);
       setAssignments(aRes.data);
@@ -57,9 +61,11 @@ export default function Projects() {
     <div className="max-w-7xl mx-auto h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Projects</h1>
-        <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-4 py-2 flex items-center text-sm">
-          <Plus className="w-4 h-4 mr-2" /> Create Project
-        </button>
+        {isAdmin && (
+          <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-4 py-2 flex items-center text-sm">
+            <Plus className="w-4 h-4 mr-2" /> Create Project
+          </button>
+        )}
       </div>
 
       {isFormOpen && (

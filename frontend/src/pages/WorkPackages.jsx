@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
+import useAuthStore from '../store/authStore';
 
 export default function WorkPackages() {
+  const { user } = useAuthStore();
   const [assignments, setAssignments] = useState([]);
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState('All');
 
   const fetchData = async () => {
     try {
+      const endpoint = user?.role === 'Admin' ? '/work' : '/work/me';
       const [wRes, pRes] = await Promise.all([
-        axios.get('/work/me'),
+        axios.get(endpoint),
         axios.get('/projects')
       ]);
       setAssignments(wRes.data);
@@ -52,6 +55,7 @@ export default function WorkPackages() {
             <thead className="text-xs text-gray-500 border-b border-gray-200">
               <tr>
                 <th className="pb-3 font-semibold">Task / Work Package</th>
+                {user?.role === 'Admin' && <th className="pb-3 font-semibold">User</th>}
                 <th className="pb-3 font-semibold">Project</th>
                 <th className="pb-3 font-semibold text-center">Estimated (hrs)</th>
                 <th className="pb-3 font-semibold text-center">Time Spent (hrs)</th>
@@ -60,8 +64,9 @@ export default function WorkPackages() {
             </thead>
             <tbody>
               {filteredAssignments.map((a) => (
-                 <tr key={a._id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={a._id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 text-gray-800 font-medium">{a.name}</td>
+                    {user?.role === 'Admin' && <td className="py-3 text-gray-600 font-medium">{a.user?.name || 'Unknown'}</td>}
                     <td className="py-3 text-gray-600">{a.project?.name}</td>
                     <td className="py-3 text-center text-gray-600">{a.estimatedHours.toFixed(1)}</td>
                     <td className="py-3 text-center font-semibold text-teal-600">{a.timeSpent.toFixed(2)}</td>
@@ -72,7 +77,7 @@ export default function WorkPackages() {
               ))}
               {filteredAssignments.length === 0 && (
                  <tr>
-                    <td colSpan="5" className="text-center py-20">
+                    <td colSpan={user?.role === 'Admin' ? "6" : "5"} className="text-center py-20">
                       <p className="text-gray-500 font-medium">No timesheets found.</p>
                     </td>
                  </tr>

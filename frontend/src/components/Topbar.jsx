@@ -1,4 +1,16 @@
+import useTimerStore from '../store/timerStore';
+import { Play, Square } from 'lucide-react';
+
 export default function Topbar() {
+  const { isTracking, elapsed, stopTracking } = useTimerStore();
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="w-full shrink-0 flex flex-col z-10 relative">
       {/* Purple Trial Banner */}
@@ -12,7 +24,13 @@ export default function Topbar() {
       {/* White Header */}
       <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
         <div className="flex items-center space-x-3">
-          {/* Breadcrumb title placeholder, will be dynamic per page ideally, but for now we'll leave it simple */}
+          {/* Active Timer Indicator */}
+          {isTracking && (
+            <div className="flex items-center bg-red-50 text-red-600 px-3 py-1.5 rounded-full border border-red-100 text-sm font-semibold animate-pulse shadow-sm">
+               <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+               {formatTime(elapsed)}
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-4">
           {/* Chat/Notification Icons */}

@@ -1,4 +1,6 @@
 import { Trophy, Calendar } from 'lucide-react';
+import useAuthStore from '../store/authStore';
+import UserDashboard from './UserDashboard';
 
 const EmptyStateCard = ({ title, colSpan = 1 }) => (
   <div className={`app-card p-5 flex flex-col items-center justify-center min-h-[250px] ${colSpan > 1 ? `md:col-span-${colSpan}` : ''}`}>
@@ -22,6 +24,10 @@ const EmptyStateCard = ({ title, colSpan = 1 }) => (
 );
 
 export default function Dashboard() {
+  const { user } = useAuthStore();
+  if (user?.role !== 'Admin') {
+    return <UserDashboard />;
+  }
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       

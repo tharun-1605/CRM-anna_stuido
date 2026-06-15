@@ -40,11 +40,11 @@ export default function Sidebar() {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full shrink-0 shadow-sm relative z-20">
       
-      {/* Apploye Logo Header */}
+      {/* WorkforcePro Logo Header */}
       <div className="h-14 flex items-center px-6">
         <div className="flex items-center text-teal-500 font-bold text-xl tracking-tight">
           <svg className="w-6 h-6 mr-2 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-          apploye
+          WorkforcePro
         </div>
       </div>
 
@@ -58,7 +58,6 @@ export default function Sidebar() {
         <NavSection title="Analyze" />
         <NavItem to="/" icon={LayoutDashboard} text="Dashboard" />
         <NavItem to="/live" icon={Radio} text="Live Feed" />
-        <NavItem to="/remote" icon={Laptop} text="RemoteTrack" />
         <NavItem to="/work-packages" icon={Clock} text="Timesheets" />
         <NavItem to="/reports" icon={FileText} text="Reports" />
 
@@ -72,6 +71,7 @@ export default function Sidebar() {
         {user?.role === 'Admin' && (
           <>
             <NavSection title="Admin" />
+            <NavItem to="/screenshots" icon={Laptop} text="Screenshots" />
             <NavItem to="/teams" icon={Users} text="Teams" />
             <NavItem to="/admin" icon={UserPlus} text="Members" />
             <NavItem to="/payroll" icon={FileText} text="Payroll" />

@@ -17,7 +17,7 @@ export default function Login() {
     try {
       const { data } = await axios.post('/auth/login', { email, password });
       setCredentials(data, data.token);
-      toast.success('Welcome to Apploye!');
+      toast.success('Welcome to WorkforcePro!');
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
@@ -32,7 +32,7 @@ export default function Login() {
         <div className="text-center mb-8 flex flex-col items-center">
           <div className="flex items-center text-teal-500 font-bold text-3xl tracking-tight mb-6">
             <svg className="w-10 h-10 mr-2 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            apploye
+            WorkforcePro
           </div>
           <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Log in to your account</h2>
         </div>
