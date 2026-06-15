@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image as ImageIcon, Download, Search, Trash2, CheckSquare } from 'lucide-react';
+import { Image as ImageIcon, Download, Search, Trash2, CheckSquare, Maximize2, X } from 'lucide-react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
 
@@ -15,6 +15,7 @@ export default function ScreenshotViewer() {
   const [screenshots, setScreenshots] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   useEffect(() => {
     const fetchDropdowns = async () => {
@@ -233,10 +234,17 @@ export default function ScreenshotViewer() {
                     className={`w-full h-full object-cover transition-all duration-500 ${selectedIds.includes(s._id) ? 'opacity-70 scale-105' : 'opacity-90 group-hover:opacity-100 group-hover:scale-105'}`}
                     onError={(e) => { e.target.src = 'https://via.placeholder.com/640x360?text=Image+Load+Error'; }}
                   />
-                  <div className={`absolute inset-0 transition-colors duration-300 flex items-center justify-center ${selectedIds.includes(s._id) ? 'bg-teal-500/20' : 'bg-black/0 group-hover:bg-black/30'}`}>
+                  <div className={`absolute inset-0 transition-colors duration-300 flex items-center justify-center space-x-3 ${selectedIds.includes(s._id) ? 'bg-teal-500/20' : 'bg-black/0 group-hover:bg-black/30'}`}>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setFullscreenImage({ url: s.imageUrl, name: s.user?.name, time: s.timeCaptured }); }}
+                      className="bg-white/90 text-gray-900 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 duration-300 shadow-lg hover:scale-110 hover:bg-white"
+                      title="Expand Image"
+                    >
+                      <Maximize2 className="w-5 h-5" />
+                    </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDownload(s); }}
-                      className="bg-white/90 text-gray-900 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 duration-300 shadow-lg hover:scale-110 hover:bg-white"
+                      className="bg-white/90 text-gray-900 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 duration-300 shadow-lg hover:scale-110 hover:bg-white delay-75"
                       title="Download Image"
                     >
                       <Download className="w-5 h-5" />
@@ -255,6 +263,33 @@ export default function ScreenshotViewer() {
           </div>
         )}
       </div>
+
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm transition-all"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <div className="relative w-full h-full flex flex-col items-center justify-center">
+            <button 
+              className="absolute top-6 right-6 text-white hover:text-red-400 bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors backdrop-blur-md z-10"
+              onClick={() => setFullscreenImage(null)}
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <div className="absolute top-6 left-6 text-white bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-2xl flex items-center shadow-2xl z-10">
+              <span className="font-extrabold text-sm tracking-wide">{fullscreenImage.name}'s Screen</span>
+              <span className="mx-3 text-gray-400">|</span>
+              <span className="font-medium text-xs text-gray-300">{fullscreenImage.time}</span>
+            </div>
+            <img 
+              src={fullscreenImage.url} 
+              alt="Fullscreen view" 
+              className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl ring-1 ring-white/10"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
