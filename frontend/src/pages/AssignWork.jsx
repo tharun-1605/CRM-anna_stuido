@@ -165,6 +165,10 @@ export default function AssignWork() {
                         {editingId === a._id ? <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-2 py-1 text-sm"/> : a.name}
                       </td>
                       <td className="py-3 text-gray-600">{a.project?.name}</td>
+                      <td className="py-3 text-gray-600">{a.user?.name}</td>
+                      <td className="py-3 text-center">
+                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">{a.status}</span>
+                      </td>
                       <td className="py-3 text-right">
                         {editingId === a._id ? (
                           <>

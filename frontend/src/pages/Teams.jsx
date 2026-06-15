@@ -8,6 +8,8 @@ export default function Teams() {
   const [users, setUsers] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '', members: [] });
+  const [editingTeamId, setEditingTeamId] = useState(null);
+  const [editName, setEditName] = useState('');
 
   const fetchData = async () => {
     try {
@@ -37,6 +39,29 @@ export default function Teams() {
     } catch (error) {
       toast.error('Failed to create team');
     }
+  };
+
+  const startEdit = (team) => {
+    setEditingTeamId(team._id);
+    setEditName(team.name);
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      await axios.put(`/teams/${id}`, { name: editName });
+      toast.success('Team updated');
+      setEditingTeamId(null);
+      fetchData();
+    } catch(err) { toast.error('Failed to update team'); }
+  };
+
+  const handleDeleteTeam = async (id) => {
+    if(!window.confirm('Delete this team?')) return;
+    try {
+      await axios.delete(`/teams/${id}`);
+      toast.success('Team deleted');
+      fetchData();
+    } catch(err) { toast.error('Failed to delete team'); }
   };
 
   const handleMemberToggle = (userId) => {
@@ -115,8 +140,26 @@ export default function Teams() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {teams.map(team => (
-                <div key={team._id} className="border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                  <h3 className="text-lg font-bold text-gray-800 mb-1">{team.name}</h3>
+                <div key={team._id} className="border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative">
+                  <div className="absolute top-4 right-4 flex space-x-2">
+                    {editingTeamId === team._id ? (
+                      <>
+                        <button onClick={() => handleUpdate(team._id)} className="text-green-600 text-xs font-bold hover:underline">Save</button>
+                        <button onClick={() => setEditingTeamId(null)} className="text-gray-500 text-xs font-bold hover:underline">Cancel</button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => startEdit(team)} className="text-teal-600 text-xs font-bold hover:underline">Edit</button>
+                        <button onClick={() => handleDeleteTeam(team._id)} className="text-red-500 text-xs font-bold hover:underline">Delete</button>
+                      </>
+                    )}
+                  </div>
+
+                  {editingTeamId === team._id ? (
+                    <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="app-input px-2 py-1 text-sm w-3/4 mb-1" />
+                  ) : (
+                    <h3 className="text-lg font-bold text-gray-800 mb-1">{team.name}</h3>
+                  )}
                   <p className="text-xs text-gray-500 mb-4 h-8 overflow-hidden">{team.description}</p>
                   <div className="border-t border-gray-100 pt-3">
                     <p className="text-xs text-gray-500 font-semibold mb-2">Members ({team.members.length})</p>

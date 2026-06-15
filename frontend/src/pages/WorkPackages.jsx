@@ -52,7 +52,7 @@ export default function WorkPackages() {
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Timesheets</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{user?.role === 'Admin' ? 'Timesheets' : 'My Tasks'}</h1>
       </div>
 
       <div className="app-card flex-1 overflow-hidden flex flex-col">

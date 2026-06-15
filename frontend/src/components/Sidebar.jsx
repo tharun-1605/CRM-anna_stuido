@@ -67,7 +67,11 @@ export default function Sidebar() {
 
         <NavSection title="Manage" />
         <NavItem to="/attendance" icon={UserCheck} text="Attendance" badge="NEW" />
-        <NavItem to="/assign-work" icon={CheckSquare} text="Tasks" />
+        {user?.role === 'Admin' ? (
+          <NavItem to="/assign-work" icon={CheckSquare} text="Assign Tasks" />
+        ) : (
+          <NavItem to="/work-packages" icon={CheckSquare} text="Tasks" />
+        )}
         <NavItem to="/leave-request" icon={Calendar} text="Leave Request" />
         <NavItem to="/projects" icon={FolderKanban} text="Projects" />
         {user?.role === 'Admin' && (

@@ -136,15 +136,30 @@ export default function Projects() {
                        {p.name.substring(0,2).toUpperCase()}
                      </div>
                      <div className="w-1/4">
-                       <p className="font-semibold text-gray-800 text-sm">{p.name}</p>
+                       {editingId === p._id ? (
+                         <input type="text" value={editData.name} onChange={(e) => setEditData({...editData, name: e.target.value})} className="app-input px-2 py-1 text-sm w-full" onClick={(e) => e.stopPropagation()} />
+                       ) : (
+                         <p className="font-semibold text-gray-800 text-sm">{p.name}</p>
+                       )}
                        <p className="text-xs text-gray-400">Project Code: -</p>
                      </div>
                      <div className="w-1/4 text-sm text-gray-600">{p.customer || '-'}</div>
                      <div className="w-1/4 text-sm text-gray-600">
                         {p.startDate ? new Date(p.startDate).toLocaleDateString() : '-'}
                      </div>
-                     <div className="w-1/4 flex justify-end">
+                     <div className="w-1/4 flex justify-end items-center space-x-3">
                        <span className="bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full font-medium">Open</span>
+                       {editingId === p._id ? (
+                         <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                           <button onClick={() => handleUpdate(p._id)} className="text-green-600 font-medium hover:underline text-xs">Save</button>
+                           <button onClick={() => setEditingId(null)} className="text-gray-500 font-medium hover:underline text-xs">Cancel</button>
+                         </div>
+                       ) : (
+                         <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                           <button onClick={() => startEdit(p)} className="text-teal-600 font-medium hover:underline text-xs">Edit</button>
+                           <button onClick={() => handleDelete(p._id)} className="text-red-500 font-medium hover:underline text-xs">Delete</button>
+                         </div>
+                       )}
                      </div>
                    </div>
                    
