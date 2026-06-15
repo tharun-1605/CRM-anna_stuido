@@ -69,6 +69,7 @@ export default function UserDashboard() {
               disabled={isTracking}
             >
               <option value="">-- Choose Task --</option>
+              {tasks.length === 0 && <option value="" disabled>No tasks assigned yet</option>}
               {tasks.map(t => (
                 <option key={t._id} value={t._id}>{t.name} (Project: {t.project?.name})</option>
               ))}

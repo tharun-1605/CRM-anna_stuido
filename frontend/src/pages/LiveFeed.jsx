@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
-import { Monitor, User, Clock, AlertCircle } from 'lucide-react';
+import { Monitor, User, Clock, AlertCircle, X } from 'lucide-react';
 
 export default function LiveFeed() {
   const [activeUsers, setActiveUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   useEffect(() => {
     const fetchLiveFeed = async () => {
@@ -81,15 +82,48 @@ export default function LiveFeed() {
                 </div>
               </div>
               
-              <div className="relative bg-black aspect-video group">
+              <div 
+                className="relative bg-black aspect-video group cursor-pointer"
+                onClick={() => setFullscreenImage({ url: data.frame, name: data.user.name })}
+              >
                 <img 
                   src={data.frame} 
                   alt={`${data.user.name}'s screen`}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain transition-transform group-hover:scale-[1.02]"
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <span className="bg-black/50 text-white px-3 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                    Click to expand
+                  </span>
+                </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <div className="relative w-full h-full flex flex-col items-center justify-center">
+            <button 
+              className="absolute top-4 right-4 text-white hover:text-gray-300 bg-black/50 p-2 rounded-full"
+              onClick={() => setFullscreenImage(null)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <p className="absolute top-4 left-4 text-white font-bold text-xl bg-black/50 px-4 py-2 rounded">
+              {fullscreenImage.name}'s Screen
+            </p>
+            <img 
+              src={fullscreenImage.url} 
+              alt="Fullscreen view" 
+              className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
     </div>

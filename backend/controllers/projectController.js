@@ -1,9 +1,27 @@
 import Project from '../models/Project.js';
+import Task from '../models/Task.js';
+import WorkPackage from '../models/WorkPackage.js';
 
 export const getProjects = async (req, res) => {
   try {
-    const filter = req.user.role === 'Admin' ? {} : { users: req.user._id };
-    const projects = await Project.find(filter).populate('users', 'name email');
+    let filter = {};
+    if (req.user.role !== 'Admin') {
+      const userTasks = await Task.find({ assignees: req.user._id });
+      const userWorkPackages = await WorkPackage.find({ user: req.user._id });
+      
+      const projectIdsFromTasks = userTasks.map(t => t.project);
+      const projectIdsFromWorkPackages = userWorkPackages.map(wp => wp.project);
+      
+      const allProjectIds = [...projectIdsFromTasks, ...projectIdsFromWorkPackages];
+      
+      filter = {
+        $or: [
+          { users: req.user._id },
+          { _id: { $in: allProjectIds } }
+        ]
+      };
+    }
+    const projects = await Project.find(filter).populate('users', 'name email').populate('client');
     res.json(projects);
   } catch (error) {
     res.status(500).json({ message: error.message });

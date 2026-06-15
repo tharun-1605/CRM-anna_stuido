@@ -87,8 +87,8 @@ export default function WorkPackages() {
                     <td className="py-3 text-gray-800 font-medium">{a.name}</td>
                     {user?.role === 'Admin' && <td className="py-3 text-gray-600 font-medium">{a.user?.name || 'Unknown'}</td>}
                     <td className="py-3 text-gray-600">{a.project?.name}</td>
-                    <td className="py-3 text-center text-gray-600">{a.estimatedHours.toFixed(1)}</td>
-                    <td className="py-3 text-center font-semibold text-teal-600">{a.timeSpent.toFixed(2)}</td>
+                    <td className="py-3 text-center text-gray-600">{a.estimatedHours ? a.estimatedHours.toFixed(1) : '0.0'}</td>
+                    <td className="py-3 text-center font-semibold text-teal-600">{a.timeSpent ? a.timeSpent.toFixed(2) : '0.00'}</td>
                     <td className="py-3 text-center">
                       {editingId === a._id ? (
                         <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="app-input px-2 py-1 text-sm">

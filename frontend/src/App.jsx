@@ -27,41 +27,40 @@ import Attendance from './pages/Attendance';
 function AnimatedRoutes() {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<PageTransition><Dashboard /></PageTransition>} />
-            <Route path="admin" element={<PageTransition><AdminPanel /></PageTransition>} />
-            <Route path="leave-approval" element={<PageTransition><LeaveRequests /></PageTransition>} />
-            <Route path="leave-request" element={<PageTransition><LeaveRequests /></PageTransition>} />
-            <Route path="screenshots" element={<PageTransition><ScreenshotViewer /></PageTransition>} />
-            <Route path="attendance" element={<PageTransition><Attendance /></PageTransition>} />
-            <Route path="projects" element={<PageTransition><Projects /></PageTransition>} />
-            <Route path="assign-work" element={<PageTransition><AssignWork /></PageTransition>} />
-            <Route path="work-packages" element={<PageTransition><WorkPackages /></PageTransition>} />
-            <Route path="work" element={<PageTransition><WorkPackages /></PageTransition>} />
-            <Route path="clients" element={<PageTransition><Clients /></PageTransition>} />
-            <Route path="customers" element={<PageTransition><Clients /></PageTransition>} />
-            <Route path="teams" element={<PageTransition><Teams /></PageTransition>} />
-            <Route path="live" element={<PageTransition><LiveFeed /></PageTransition>} />
-            <Route path="reports" element={<PageTransition><Reports /></PageTransition>} />
-            <Route path="invoice" element={<PageTransition><GenericPlaceholder title="Invoices" /></PageTransition>} />
-            <Route path="payroll" element={<PageTransition><Payroll /></PageTransition>} />
-            <Route path="integrations" element={<PageTransition><GenericPlaceholder title="Integrations" /></PageTransition>} />
-            <Route path="organizations" element={<PageTransition><Organizations /></PageTransition>} />
-            <Route path="settings" element={<PageTransition><GenericPlaceholder title="Settings" /></PageTransition>} />
-          </Route>
+    <Routes location={location}>
+      <Route path="/login" element={<Login />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="admin" element={<AdminPanel />} />
+          <Route path="leave-approval" element={<LeaveRequests />} />
+          <Route path="leave-request" element={<LeaveRequests />} />
+          <Route path="screenshots" element={<ScreenshotViewer />} />
+          <Route path="attendance" element={<Attendance />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="assign-work" element={<AssignWork />} />
+          <Route path="work-packages" element={<WorkPackages />} />
+          <Route path="work" element={<WorkPackages />} />
+          <Route path="clients" element={<Clients />} />
+          <Route path="customers" element={<Clients />} />
+          <Route path="teams" element={<Teams />} />
+          <Route path="live" element={<LiveFeed />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="invoice" element={<GenericPlaceholder title="Invoices" />} />
+          <Route path="payroll" element={<Payroll />} />
+          <Route path="integrations" element={<GenericPlaceholder title="Integrations" />} />
+          <Route path="organizations" element={<Organizations />} />
+          <Route path="settings" element={<GenericPlaceholder title="Settings" />} />
         </Route>
-      </Routes>
-    </AnimatePresence>
+      </Route>
+    </Routes>
   );
 }
 
 function App() {
-  const { isTracking } = useTimerStore();
-  const { todayRecord, fetchToday } = useAttendanceStore();
+  const isTracking = useTimerStore((state) => state.isTracking);
+  const todayRecord = useAttendanceStore((state) => state.todayRecord);
+  const fetchToday = useAttendanceStore((state) => state.fetchToday);
 
   useEffect(() => {
     // Attempt to fetch today's record once on load

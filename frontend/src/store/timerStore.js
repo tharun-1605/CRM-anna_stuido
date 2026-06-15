@@ -36,14 +36,7 @@ const useTimerStore = create((set, get) => ({
       video.playsInline = true;
       video.autoplay = true;
       
-      video.style.position = 'fixed';
-      video.style.top = '0px';
-      video.style.left = '0px';
-      video.style.width = '100px';
-      video.style.height = '100px';
-      video.style.zIndex = '-9999';
-      video.style.pointerEvents = 'none';
-      document.body.appendChild(video);
+      // Do not append video to DOM to prevent any overlay/click issues
       
       await new Promise((resolve) => {
         video.onloadedmetadata = () => {
