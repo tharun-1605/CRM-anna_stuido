@@ -10,12 +10,13 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [clients, setClients] = useState([]);
+  const [users, setUsers] = useState([]);
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [viewProject, setViewProject] = useState(null);
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', client: '', description: '', startDate: '', endDate: '', events: []
+    name: '', client: '', description: '', startDate: '', endDate: '', priority: 'Medium', events: []
   });
 
   const addEvent = () => {
@@ -31,17 +32,24 @@ export default function Projects() {
     setFormData({ ...formData, events: newEvents });
   };
 
+  const removeEvent = (index) => {
+    const newEvents = formData.events.filter((_, i) => i !== index);
+    setFormData({ ...formData, events: newEvents });
+  };
+
   const fetchData = async () => {
     try {
       const endpoint = isAdmin ? '/work' : '/work/me';
-      const [pRes, aRes, cRes] = await Promise.all([
+      const [pRes, aRes, cRes, uRes] = await Promise.all([
         axios.get('/projects'),
         axios.get(endpoint),
-        isAdmin ? axios.get('/clients') : Promise.resolve({ data: [] })
+        isAdmin ? axios.get('/clients') : Promise.resolve({ data: [] }),
+        isAdmin ? axios.get('/auth/users') : Promise.resolve({ data: [] })
       ]);
       setProjects(pRes.data);
       setAssignments(aRes.data);
       setClients(cRes.data);
+      setUsers(uRes.data);
     } catch (err) {
       toast.error('Failed to fetch data');
     }
@@ -63,33 +71,45 @@ export default function Projects() {
 
 
   const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({ name: '', description: '' });
   
   const startEdit = (p) => {
     setEditingId(p._id);
-    setEditData({ name: p.name, description: p.description || '' });
+    setFormData({
+      name: p.name,
+      client: p.client?._id || p.customer || '',
+      description: p.description || '',
+      startDate: p.startDate ? p.startDate.split('T')[0] : '',
+      endDate: p.endDate ? p.endDate.split('T')[0] : '',
+      priority: p.priority || 'Medium',
+      events: p.events || []
+    });
+    setIsFormOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleUpdate = async (id) => {
-    try {
-      await axios.put(`/projects/${id}`, editData);
-      toast.success('Project updated');
-      setEditingId(null);
-      fetchData();
-    } catch(err) { toast.error('Failed to update project'); }
-  };
-
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!formData.name) return toast.error('Project Name is required');
     try {
-      await axios.post('/projects', formData);
-      toast.success('Project created successfully');
+      if (editingId) {
+        await axios.put(`/projects/${editingId}`, formData);
+        toast.success('Project updated successfully');
+      } else {
+        await axios.post('/projects', formData);
+        toast.success('Project created successfully');
+      }
       fetchData();
       setIsFormOpen(false);
-      setFormData({ name: '', client: '', description: '', startDate: '', endDate: '', events: [] });
+      setEditingId(null);
+      setFormData({ name: '', client: '', description: '', startDate: '', endDate: '', priority: 'Medium', events: [] });
     } catch (err) {
-      toast.error('Error creating project');
+      toast.error('Error saving project');
     }
+  };
+
+  const handleCancelForm = () => {
+    setIsFormOpen(false);
+    setEditingId(null);
+    setFormData({ name: '', client: '', description: '', startDate: '', endDate: '', priority: 'Medium', events: [] });
   };
 
   const toggleRow = (id) => {
@@ -106,8 +126,8 @@ export default function Projects() {
       <div className="flex items-center justify-between mb-2 animate-fade-in-up">
         <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 tracking-tight">Projects</h1>
         {isAdmin && (
-          <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all">
-            <Plus className="w-5 h-5 mr-2" /> Create Project
+          <button onClick={() => { if(isFormOpen) handleCancelForm(); else setIsFormOpen(true); }} className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all">
+            <Plus className="w-5 h-5 mr-2" /> {isFormOpen ? 'Close Form' : 'Create Project'}
           </button>
         )}
       </div>
@@ -115,7 +135,7 @@ export default function Projects() {
       {isFormOpen && (
         <div className="app-card p-8 mb-6 animate-fade-in-up relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-          <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10">New Project</h3>
+          <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10">{editingId ? 'Edit Project' : 'New Project'}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 relative z-10">
             <div>
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Project Name</label>
@@ -136,6 +156,14 @@ export default function Projects() {
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">End Date</label>
               <input type="date" placeholder="End Date" value={formData.endDate} onChange={(e)=>setFormData({...formData, endDate: e.target.value})} className="app-input w-full px-4 py-2.5 text-sm" />
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Priority</label>
+              <select value={formData.priority} onChange={(e)=>setFormData({...formData, priority: e.target.value})} className="app-input w-full px-4 py-2.5 text-sm">
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+              </select>
+            </div>
             <div className="lg:col-span-2">
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Description</label>
               <textarea placeholder="Description" value={formData.description} onChange={(e)=>setFormData({...formData, description: e.target.value})} className="app-input w-full px-4 py-2.5 text-sm" rows="1"></textarea>
@@ -149,7 +177,8 @@ export default function Projects() {
             </div>
             <div className="space-y-3">
             {formData.events.map((ev, i) => (
-                <div key={i} className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div key={i} className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow relative">
+                   <button onClick={() => removeEvent(i)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 hover:bg-red-500 hover:text-white w-6 h-6 rounded-full flex items-center justify-center transition-colors shadow-sm">&times;</button>
                    <div className="col-span-2 md:col-span-1">
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Date</label>
                      <input type="date" value={ev.date} onChange={(e)=>handleEventChange(i, 'date', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
@@ -176,7 +205,10 @@ export default function Projects() {
                    </div>
                    <div>
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Camera Man</label>
-                     <input type="text" placeholder="Camera Man" value={ev.cameraMan} onChange={(e)=>handleEventChange(i, 'cameraMan', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
+                     <select value={ev.cameraMan} onChange={(e)=>handleEventChange(i, 'cameraMan', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs">
+                        <option value="">Select Member</option>
+                        {users.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
+                     </select>
                    </div>
                    <div>
                      <label className="block text-xs font-semibold text-gray-500 mb-1">HDD</label>
@@ -184,7 +216,10 @@ export default function Projects() {
                    </div>
                    <div>
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Copied By</label>
-                     <input type="text" placeholder="Copied By" value={ev.copiedBy} onChange={(e)=>handleEventChange(i, 'copiedBy', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
+                     <select value={ev.copiedBy} onChange={(e)=>handleEventChange(i, 'copiedBy', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs">
+                        <option value="">Select Member</option>
+                        {users.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
+                     </select>
                    </div>
                    <div className="col-span-2 md:col-span-5">
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Notes</label>
@@ -195,8 +230,9 @@ export default function Projects() {
             </div>
           </div>
 
-          <div className="flex justify-end relative z-10">
-            <button onClick={handleCreate} className="app-btn-primary px-6 py-2.5 text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all">Save Project</button>
+          <div className="flex justify-end relative z-10 space-x-3">
+            <button onClick={handleCancelForm} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 py-2.5 rounded-md font-bold text-sm transition-colors">Cancel</button>
+            <button onClick={handleSave} className="app-btn-primary px-6 py-2.5 text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all">{editingId ? 'Update Project' : 'Save Project'}</button>
           </div>
         </div>
       )}
@@ -233,11 +269,12 @@ export default function Projects() {
                        {p.name ? p.name.substring(0,2).toUpperCase() : 'PR'}
                      </div>
                      <div className="w-1/4">
-                       {editingId === p._id ? (
-                         <input type="text" value={editData.name} onChange={(e) => setEditData({...editData, name: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full" onClick={(e) => e.stopPropagation()} />
-                       ) : (
-                         <p className="font-extrabold text-gray-800 text-[15px] group-hover:text-indigo-600 transition-colors">{p.name}</p>
-                       )}
+                       <p className="font-extrabold text-gray-800 text-[15px] group-hover:text-indigo-600 transition-colors flex items-center">
+                         {p.name}
+                         {p.priority === 'High' && <span className="ml-2 bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">High</span>}
+                         {p.priority === 'Medium' && <span className="ml-2 bg-yellow-100 text-yellow-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Med</span>}
+                         {p.priority === 'Low' && <span className="ml-2 bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Low</span>}
+                       </p>
                        <p className="text-xs font-semibold text-gray-400 mt-0.5">Project Code: #{p._id.substring(p._id.length - 6).toUpperCase()}</p>
                      </div>
                      <div className="w-1/4">
@@ -250,22 +287,15 @@ export default function Projects() {
                      </div>
                      <div className="w-1/4 flex justify-end items-center space-x-4">
                        <span className="bg-emerald-100 text-emerald-700 text-xs px-3 py-1.5 rounded-full font-bold border border-emerald-200">Active</span>
-                       {editingId === p._id ? (
-                         <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
-                           <button onClick={() => handleUpdate(p._id)} className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Save</button>
-                           <button onClick={() => setEditingId(null)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Cancel</button>
-                         </div>
-                       ) : (
-                         <div className="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                           {isAdmin && (
-                             <>
-                               <button onClick={() => startEdit(p)} className="text-indigo-600 hover:text-indigo-800 font-bold text-sm transition-colors">Edit</button>
-                               <button onClick={() => handleDelete(p._id)} className="text-red-500 hover:text-red-700 font-bold text-sm transition-colors">Delete</button>
-                             </>
-                           )}
-                           <button onClick={(e) => { e.stopPropagation(); setViewProject(p); }} className="text-teal-600 hover:text-teal-800 font-bold text-sm transition-colors flex items-center"><Eye className="w-4 h-4 mr-1"/> View</button>
-                         </div>
-                       )}
+                       <div className="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                         {isAdmin && (
+                           <>
+                             <button onClick={() => startEdit(p)} className="text-indigo-600 hover:text-indigo-800 font-bold text-sm transition-colors">Edit</button>
+                             <button onClick={() => handleDelete(p._id)} className="text-red-500 hover:text-red-700 font-bold text-sm transition-colors">Delete</button>
+                           </>
+                         )}
+                         <button onClick={(e) => { e.stopPropagation(); setViewProject(p); }} className="text-teal-600 hover:text-teal-800 font-bold text-sm transition-colors flex items-center"><Eye className="w-4 h-4 mr-1"/> View</button>
+                       </div>
                      </div>
                    </div>
                    

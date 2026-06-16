@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', company: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', company: '', phone: '' });
 
   const fetchClients = async () => {
     try {
@@ -33,11 +33,11 @@ export default function Clients() {
 
 
   const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({ name: '', company: '', email: '' });
+  const [editData, setEditData] = useState({ name: '', company: '', email: '', phone: '' });
   
   const startEdit = (c) => {
     setEditingId(c._id);
-    setEditData({ name: c.name, company: c.company || '', email: c.email || '' });
+    setEditData({ name: c.name, company: c.company || '', email: c.email || '', phone: c.phone || '' });
   };
 
   const handleUpdate = async (id) => {
@@ -55,7 +55,7 @@ export default function Clients() {
       await axios.post('/clients', formData);
       toast.success('Client added successfully');
       setIsFormOpen(false);
-      setFormData({ name: '', email: '', company: '' });
+      setFormData({ name: '', email: '', company: '', phone: '' });
       fetchClients();
     } catch (error) {
       toast.error('Failed to add client');
@@ -75,7 +75,7 @@ export default function Clients() {
         <div className="app-card p-8 mb-6 animate-fade-in-up relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
           <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10">Add New Client</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end relative z-10">
             <div>
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Client Name <span className="text-red-500">*</span></label>
               <input type="text" placeholder="e.g. Acme Corp" value={formData.name} onChange={(e)=>setFormData({...formData, name: e.target.value})} className="w-full app-input px-4 py-2.5 text-sm" />
@@ -87,6 +87,10 @@ export default function Clients() {
             <div>
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Company</label>
               <input type="text" placeholder="Company Name" value={formData.company} onChange={(e)=>setFormData({...formData, company: e.target.value})} className="w-full app-input px-4 py-2.5 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Phone Number</label>
+              <input type="text" placeholder="+1 234 567 8900" value={formData.phone} onChange={(e)=>setFormData({...formData, phone: e.target.value})} className="w-full app-input px-4 py-2.5 text-sm" />
             </div>
             <button onClick={handleCreate} className="app-btn-primary px-6 py-2.5 text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all w-full">Save Client</button>
           </div>
@@ -128,6 +132,7 @@ export default function Clients() {
                     <th className="px-6 py-4 font-bold">Client Name</th>
                     <th className="px-6 py-4 font-bold">Company</th>
                     <th className="px-6 py-4 font-bold">Email</th>
+                    <th className="px-6 py-4 font-bold">Phone</th>
                     <th className="px-6 py-4 font-bold text-center">Status</th>
                     <th className="px-6 py-4 font-bold text-right">Actions</th>
                   </tr>
@@ -154,6 +159,11 @@ export default function Clients() {
                         <td className="px-6 py-4 text-gray-600">
                           {editingId === c._id ? <input type="text" value={editData.email} onChange={e=>setEditData({...editData, email: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full"/> : (
                             <a href={`mailto:${c.email}`} className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors">{c.email || '-'}</a>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {editingId === c._id ? <input type="text" value={editData.phone} onChange={e=>setEditData({...editData, phone: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full"/> : (
+                            <a href={`tel:${c.phone}`} className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors">{c.phone || '-'}</a>
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">

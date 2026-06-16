@@ -19,6 +19,7 @@ export default function AssignWork() {
   const [selectedProject, setSelectedProject] = useState('');
   const [workPackageName, setWorkPackageName] = useState('');
   const [estimatedHours, setEstimatedHours] = useState('');
+  const [priority, setPriority] = useState('Medium');
   const [teams, setTeams] = useState([]);
 
   const fetchData = async () => {
@@ -56,11 +57,11 @@ export default function AssignWork() {
 
 
   const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({ name: '', estimatedHours: 0 });
+  const [editData, setEditData] = useState({ name: '', estimatedHours: 0, priority: 'Medium' });
   
   const startEdit = (t) => {
     setEditingId(t._id);
-    setEditData({ name: t.name, estimatedHours: t.estimatedHours || 0 });
+    setEditData({ name: t.name, estimatedHours: t.estimatedHours || 0, priority: t.priority || 'Medium' });
   };
 
   const handleUpdate = async (id) => {
@@ -80,7 +81,8 @@ export default function AssignWork() {
       const payload = {
         project: selectedProject,
         name: workPackageName,
-        estimatedHours: Number(estimatedHours)
+        estimatedHours: Number(estimatedHours),
+        priority
       };
       
       if (assignToType === 'User') {
@@ -94,6 +96,7 @@ export default function AssignWork() {
       setIsFormOpen(false);
       setWorkPackageName('');
       setEstimatedHours('');
+      setPriority('Medium');
       fetchData();
     } catch (err) {
       toast.error('Failed to assign task');
@@ -156,6 +159,14 @@ export default function AssignWork() {
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Est. Hours</label>
               <input type="number" step="0.1" placeholder="0.0" value={estimatedHours} onChange={(e)=>setEstimatedHours(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm" />
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Priority</label>
+              <select value={priority} onChange={(e)=>setPriority(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
             <button onClick={handleAssign} className="app-btn-primary px-6 py-2.5 text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all w-full">Save Task</button>
           </div>
         </div>
@@ -199,7 +210,25 @@ export default function AssignWork() {
                    <tr key={a._id} className="hover:bg-teal-50/30 transition-colors group">
                       
                         <td className="px-6 py-4 text-gray-800 font-bold">
-                          {editingId === a._id ? <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full"/> : a.name}
+                          <div className="flex items-center">
+                            {editingId === a._id ? (
+                              <>
+                                <input type="text" value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} className="app-input px-3 py-1.5 text-sm w-full mr-2"/>
+                                <select value={editData.priority} onChange={e=>setEditData({...editData, priority: e.target.value})} className="app-input px-2 py-1.5 text-xs">
+                                  <option value="High">High</option>
+                                  <option value="Medium">Medium</option>
+                                  <option value="Low">Low</option>
+                                </select>
+                              </>
+                            ) : (
+                              <>
+                                {a.name}
+                                {a.priority === 'High' && <span className="ml-2 bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">High</span>}
+                                {a.priority === 'Medium' && <span className="ml-2 bg-yellow-100 text-yellow-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Med</span>}
+                                {a.priority === 'Low' && <span className="ml-2 bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Low</span>}
+                              </>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-gray-600 font-semibold">{a.project?.name}</td>
                         <td className="px-6 py-4">

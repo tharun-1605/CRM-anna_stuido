@@ -11,8 +11,8 @@ export const getClients = async (req, res) => {
 
 export const createClient = async (req, res) => {
   try {
-    const { name, email, company, status } = req.body;
-    const client = await Client.create({ name, email, company, status });
+    const { name, email, phone, company, status } = req.body;
+    const client = await Client.create({ name, email, phone, company, status });
     res.status(201).json(client);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

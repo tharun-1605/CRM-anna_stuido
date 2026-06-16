@@ -6,6 +6,7 @@ const workPackageSchema = new mongoose.Schema({
   name: { type: String, required: true },
   estimatedHours: { type: Number, required: true },
   status: { type: String, enum: ['Assigned', 'In Progress', 'Completed'], default: 'Assigned' },
+  priority: { type: String, enum: ['High', 'Medium', 'Low'], default: 'Medium' },
 }, { timestamps: true });
 
 export default mongoose.model('WorkPackage', workPackageSchema);
