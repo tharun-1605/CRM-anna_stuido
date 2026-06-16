@@ -1,12 +1,18 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useTimerStore from '../store/timerStore';
 import useAuthStore from '../store/authStore';
-import { Play, Square, Bell, Search } from 'lucide-react';
+import { Play, Square, Bell, Search, LogOut } from 'lucide-react';
 
 export default function Topbar() {
   const { isTracking, elapsed, stopTracking } = useTimerStore();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600);
@@ -84,6 +90,15 @@ export default function Topbar() {
               <Bell className="w-5 h-5 group-hover:text-teal-500 transition-colors" />
               <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
             </button>
+            {user?.role !== 'Admin' && (
+              <button 
+                onClick={handleLogout} 
+                className="relative p-2 rounded-full hover:bg-red-50 text-gray-400 transition-colors group" 
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5 group-hover:text-red-500 transition-colors" />
+              </button>
+            )}
           </div>
 
           {/* User Profile Info */}
