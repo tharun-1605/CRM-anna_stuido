@@ -66,6 +66,7 @@ export const clockOut = async (req, res) => {
     });
 
     attendance.totalHours = totalMs / (1000 * 60 * 60); 
+    attendance.markModified('breaks');
     await attendance.save();
 
     res.json(attendance);
@@ -90,6 +91,7 @@ export const startBreak = async (req, res) => {
     }
 
     attendance.breaks.push({ type, startTime: new Date() });
+    attendance.markModified('breaks');
     await attendance.save();
 
     res.json(attendance);
@@ -113,6 +115,7 @@ export const endBreak = async (req, res) => {
     }
 
     activeBreak.endTime = new Date();
+    attendance.markModified('breaks');
     await attendance.save();
 
     res.json(attendance);

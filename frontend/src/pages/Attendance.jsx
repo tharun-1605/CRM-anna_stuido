@@ -35,11 +35,18 @@ export default function Attendance() {
   }, [user, dateFilter]);
 
   const handleBtnClick = async (endpoint, payload = {}) => {
-    const res = await handleAction(endpoint, payload);
-    if (res.success) {
-      toast.success('Action successful');
-    } else {
-      toast.error(res.message);
+    console.log(`Button clicked! Endpoint: ${endpoint}, Payload:`, payload);
+    try {
+      const res = await handleAction(endpoint, payload);
+      console.log(`Action result:`, res);
+      if (res.success) {
+        toast.success('Action successful');
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      console.error("Error in handleBtnClick:", error);
+      alert("Error: " + error.message);
     }
   };
 
@@ -122,25 +129,25 @@ export default function Attendance() {
 
           <div className="flex flex-wrap justify-center gap-4 relative z-10">
             {!todayRecord?.clockIn ? (
-              <button onClick={() => handleBtnClick('clock-in')} disabled={storeLoading} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-lg hover:shadow-teal-500/30 flex items-center px-10 py-4 rounded-xl text-lg font-bold transition-all transform hover:-translate-y-1">
+              <button type="button" onClick={() => handleBtnClick('clock-in')} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-lg hover:shadow-teal-500/30 flex items-center px-10 py-4 rounded-xl text-lg font-bold transition-all transform hover:-translate-y-1">
                 <PlayCircle className="w-6 h-6 mr-2" /> Clock In
               </button>
             ) : !isClockedOut ? (
               <>
                 {!isOnBreak ? (
                   <>
-                    <button onClick={() => handleBtnClick('break/start', { type: 'Break' })} disabled={storeLoading} className="bg-yellow-500 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/30 text-white flex items-center px-6 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
+                    <button type="button" onClick={() => handleBtnClick('break/start', { type: 'Break' })} className="bg-yellow-500 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/30 text-white flex items-center px-6 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
                       <Coffee className="w-5 h-5 mr-2" /> Take Break
                     </button>
-                    <button onClick={() => handleBtnClick('break/start', { type: 'Lunch' })} disabled={storeLoading} className="bg-orange-500 hover:bg-orange-600 shadow-lg hover:shadow-orange-500/30 text-white flex items-center px-6 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
+                    <button type="button" onClick={() => handleBtnClick('break/start', { type: 'Lunch' })} className="bg-orange-500 hover:bg-orange-600 shadow-lg hover:shadow-orange-500/30 text-white flex items-center px-6 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
                       <StopCircle className="w-5 h-5 mr-2" /> Take Lunch
                     </button>
-                    <button onClick={() => handleBtnClick('clock-out')} disabled={storeLoading} className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-red-500/30 text-white flex items-center px-8 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
+                    <button type="button" onClick={() => handleBtnClick('clock-out')} className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-red-500/30 text-white flex items-center px-8 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
                       <LogOut className="w-5 h-5 mr-2" /> Clock Out
                     </button>
                   </>
                 ) : (
-                  <button onClick={() => handleBtnClick('break/end')} disabled={storeLoading} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg hover:shadow-teal-500/30 text-white flex items-center px-10 py-4 rounded-xl text-lg font-bold transition-all transform hover:-translate-y-1">
+                  <button type="button" onClick={() => handleBtnClick('break/end')} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg hover:shadow-teal-500/30 text-white flex items-center px-10 py-4 rounded-xl text-lg font-bold transition-all transform hover:-translate-y-1">
                     <PlayCircle className="w-6 h-6 mr-2" /> Resume Work
                   </button>
                 )}

@@ -1,5 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
+import useTimerStore from '../store/timerStore';
+import toast from 'react-hot-toast';
 import { 
   Star, LayoutDashboard, Radio, Laptop, Clock, FileText, 
   CheckSquare, Calendar, LogIn, Plane, FolderKanban, Receipt, Users, 
@@ -7,11 +9,17 @@ import {
 } from 'lucide-react';
 
 export default function Sidebar() {
-  const { user, logout } = useAuthStore();
+  const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
+  const isTracking = useTimerStore(state => state.isTracking);
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => {
+    if (isTracking) {
+      toast.error('Please stop time tracking before logging out.');
+      return;
+    }
     logout();
     navigate('/login');
   };
@@ -38,7 +46,7 @@ export default function Sidebar() {
   );
 
   return (
-    <div className="w-64 bg-white/80 backdrop-blur-md border-r border-gray-100 flex flex-col h-full shrink-0 shadow-sm relative z-20 overflow-hidden">
+    <div className="w-64 bg-white border-r border-gray-100 flex flex-col h-full shrink-0 shadow-sm relative z-20 overflow-hidden">
       
       {/* Decorative Blur */}
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-teal-50/50 to-transparent pointer-events-none"></div>

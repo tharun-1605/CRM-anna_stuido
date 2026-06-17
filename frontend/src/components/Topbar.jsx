@@ -2,14 +2,22 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useTimerStore from '../store/timerStore';
 import useAuthStore from '../store/authStore';
 import { Play, Square, Bell, Search, LogOut } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Topbar() {
-  const { isTracking, elapsed, stopTracking } = useTimerStore();
-  const { user, logout } = useAuthStore();
+  const isTracking = useTimerStore(state => state.isTracking);
+  const elapsed = useTimerStore(state => state.elapsed);
+  const stopTracking = useTimerStore(state => state.stopTracking);
+  const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
   const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    if (isTracking) {
+      toast.error('Please stop time tracking before logging out.');
+      return;
+    }
     logout();
     navigate('/login');
   };
@@ -28,7 +36,7 @@ export default function Topbar() {
 
       
       {/* White Header */}
-      <div className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center px-8 shadow-sm">
+      <div className="h-16 bg-white border-b border-gray-100 flex items-center px-8 shadow-sm">
         {/* Left Side: Brand (for User) or Empty (for Admin since they have Sidebar) */}
         {user?.role !== 'Admin' && (
           <div className="flex items-center text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 mr-10 font-black text-xl tracking-tighter">

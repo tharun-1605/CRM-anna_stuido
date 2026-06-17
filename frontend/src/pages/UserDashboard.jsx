@@ -7,14 +7,12 @@ import useTimerStore from '../store/timerStore';
 export default function UserDashboard() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const { 
-    isTracking, 
-    activeTask, 
-    elapsed, 
-    setActiveTask, 
-    startTracking, 
-    stopTracking 
-  } = useTimerStore();
+  const isTracking = useTimerStore(state => state.isTracking);
+  const activeTask = useTimerStore(state => state.activeTask);
+  const elapsed = useTimerStore(state => state.elapsed);
+  const setActiveTask = useTimerStore(state => state.setActiveTask);
+  const startTracking = useTimerStore(state => state.startTracking);
+  const stopTracking = useTimerStore(state => state.stopTracking);
 
   useEffect(() => {
     const fetchData = async () => {
