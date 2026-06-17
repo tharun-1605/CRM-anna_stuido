@@ -21,33 +21,44 @@ const useTimerStore = create((set, get) => ({
     }
 
     try {
+      let stream = null;
+      let video = null;
+      let imageCapture = null;
+      let hasScreenshot = false;
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-         toast.error('Screenshots not supported in this browser without user gesture.');
-         return;
+         toast.error('Screenshots disabled (HTTPS required). Tracking time only.');
+      } else {
+        try {
+          // Request screenshot permission
+          stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          // We will keep this stream active to capture frames without prompting again
+          
+          video = document.createElement('video');
+          video.srcObject = stream;
+          video.muted = true;
+          video.playsInline = true;
+          video.autoplay = true;
+          
+          // Do not append video to DOM to prevent any overlay/click issues
+          
+          await new Promise((resolve) => {
+            video.onloadedmetadata = () => {
+              video.play().then(resolve).catch(resolve);
+            };
+          });
+          
+          const track = stream.getVideoTracks()[0];
+          imageCapture = window.ImageCapture ? new ImageCapture(track) : null;
+          hasScreenshot = true;
+        } catch (err) {
+          console.error("Screenshot setup failed:", err);
+          toast.error('Screenshot permission denied. Tracking time only.');
+        }
       }
-      
-      // Request screenshot permission
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-      // We will keep this stream active to capture frames without prompting again
-      
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.muted = true;
-      video.playsInline = true;
-      video.autoplay = true;
-      
-      // Do not append video to DOM to prevent any overlay/click issues
-      
-      await new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-          video.play().then(resolve).catch(resolve);
-        };
-      });
-      
-      const track = stream.getVideoTracks()[0];
-      const imageCapture = window.ImageCapture ? new ImageCapture(track) : null;
 
       const captureAndSend = async (endpoint, isLive = false) => {
+        if (!hasScreenshot || !video) return;
         try {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
@@ -86,17 +97,22 @@ const useTimerStore = create((set, get) => ({
         }
       };
 
-      // Wait for the video frame to actually render
-      setTimeout(() => {
-        captureAndSend('/screenshots');
-        captureAndSend('/live/frame', true);
-      }, 1000);
-      
-      // Every 3 mins save screenshot
-      const screenshotIntervalId = setInterval(() => captureAndSend('/screenshots'), 3 * 60 * 1000);
-      
-      // Every 10 secs update live feed
-      const liveIntervalId = setInterval(() => captureAndSend('/live/frame', true), 10 * 1000);
+      let screenshotIntervalId = null;
+      let liveIntervalId = null;
+
+      if (hasScreenshot) {
+        // Wait for the video frame to actually render
+        setTimeout(() => {
+          captureAndSend('/screenshots');
+          captureAndSend('/live/frame', true);
+        }, 1000);
+        
+        // Every 3 mins save screenshot
+        screenshotIntervalId = setInterval(() => captureAndSend('/screenshots'), 3 * 60 * 1000);
+        
+        // Every 10 secs update live feed
+        liveIntervalId = setInterval(() => captureAndSend('/live/frame', true), 10 * 1000);
+      }
       
       const intervalId = setInterval(() => {
         set(state => ({ elapsed: state.elapsed + 1 }));
@@ -111,11 +127,11 @@ const useTimerStore = create((set, get) => ({
         _stream: stream,
         _video: video 
       });
-      toast.success('Time tracking started');
+      toast.success(hasScreenshot ? 'Time tracking started' : 'Time tracking started (No screenshots)');
 
     } catch (err) {
       console.error(err);
-      toast.error('Failed to start tracking. Permission denied?');
+      toast.error('Failed to start tracking.');
     }
   },
 
