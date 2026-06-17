@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import useTimerStore from '../store/timerStore';
+import useAttendanceStore from '../store/attendanceStore';
 import toast from 'react-hot-toast';
 import { 
   Star, LayoutDashboard, Radio, Laptop, Clock, FileText, 
@@ -8,16 +9,36 @@ import {
   UsersRound, Settings, Blocks, Building2, UserPlus, HelpCircle, UserCheck
 } from 'lucide-react';
 
-export default function Sidebar() {
+import { X } from 'lucide-react';
+
+export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   const user = useAuthStore(state => state.user);
   const logout = useAuthStore(state => state.logout);
   const isTracking = useTimerStore(state => state.isTracking);
+  const todayRecord = useAttendanceStore(state => state.todayRecord);
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => {
+    let preventLogout = false;
+    let message = '';
+
     if (isTracking) {
-      toast.error('Please stop time tracking before logging out.');
+      preventLogout = true;
+      message = 'Please stop time tracking before logging out.';
+    } else if (todayRecord) {
+      const isClockedIn = !!todayRecord.clockIn;
+      const isClockedOut = !!todayRecord.clockOut;
+      const isOnBreak = !!(todayRecord.breaks && todayRecord.breaks.find(b => !b.endTime));
+
+      if (isClockedIn && !isClockedOut && !isOnBreak) {
+        preventLogout = true;
+        message = 'Please take a break or clock out before logging out.';
+      }
+    }
+
+    if (preventLogout) {
+      toast.error(message);
       return;
     }
     logout();
@@ -36,7 +57,10 @@ export default function Sidebar() {
   );
 
   const NavItem = ({ to, icon: Icon, text, badge }) => (
-    <Link to={to} className={`flex items-center px-4 py-2.5 mx-3 my-1 rounded-xl transition-all duration-200 text-[13px] font-bold ${isActive(to) ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-md shadow-teal-500/20 transform scale-[1.02]' : 'text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:scale-[1.01]'}`}>
+    <Link 
+      to={to} 
+      onClick={() => setMobileMenuOpen?.(false)}
+      className={`flex items-center px-4 py-2.5 mx-3 my-1 rounded-xl transition-all duration-200 text-[13px] font-bold ${isActive(to) ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-md shadow-teal-500/20 transform scale-[1.02]' : 'text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:scale-[1.01]'}`}>
       <Icon className={`w-[18px] h-[18px] mr-3 ${isActive(to) ? 'text-white' : 'text-gray-400 group-hover:text-teal-500'}`} /> 
       <span className="flex-1">{text}</span>
       {badge && (
@@ -46,17 +70,20 @@ export default function Sidebar() {
   );
 
   return (
-    <div className="w-64 bg-white border-r border-gray-100 flex flex-col h-full shrink-0 shadow-sm relative z-20 overflow-hidden">
+    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-100 flex flex-col h-full shrink-0 shadow-xl lg:shadow-sm lg:relative transform transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       
       {/* Decorative Blur */}
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-teal-50/50 to-transparent pointer-events-none"></div>
 
       {/* WorkforcePro Logo Header */}
-      <div className="h-16 flex items-center px-6 relative z-10 border-b border-gray-50/50">
+      <div className="h-16 flex items-center justify-between px-6 relative z-10 border-b border-gray-50/50">
         <div className="flex items-center text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 font-black text-2xl tracking-tighter">
           <svg className="w-7 h-7 mr-2 fill-current text-teal-500" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
           WorkforcePro
         </div>
+        <button className="lg:hidden p-1 text-gray-400 hover:text-gray-600" onClick={() => setMobileMenuOpen?.(false)}>
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       <div className="px-4 py-3 mt-4 border-b border-gray-50 flex flex-col items-center justify-center cursor-pointer hover:bg-teal-50/50 transition-colors mx-3 rounded-xl border border-gray-100 border-dashed group">

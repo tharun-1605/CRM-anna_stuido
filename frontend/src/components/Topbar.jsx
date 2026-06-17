@@ -1,21 +1,40 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useTimerStore from '../store/timerStore';
 import useAuthStore from '../store/authStore';
-import { Play, Square, Bell, Search, LogOut } from 'lucide-react';
+import useAttendanceStore from '../store/attendanceStore';
+import { Play, Square, Bell, Search, LogOut, Menu } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export default function Topbar() {
+export default function Topbar({ setMobileMenuOpen }) {
   const isTracking = useTimerStore(state => state.isTracking);
   const elapsed = useTimerStore(state => state.elapsed);
   const stopTracking = useTimerStore(state => state.stopTracking);
   const user = useAuthStore(state => state.user);
   const logout = useAuthStore(state => state.logout);
+  const todayRecord = useAttendanceStore(state => state.todayRecord);
   const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    let preventLogout = false;
+    let message = '';
+
     if (isTracking) {
-      toast.error('Please stop time tracking before logging out.');
+      preventLogout = true;
+      message = 'Please stop time tracking before logging out.';
+    } else if (todayRecord) {
+      const isClockedIn = !!todayRecord.clockIn;
+      const isClockedOut = !!todayRecord.clockOut;
+      const isOnBreak = !!(todayRecord.breaks && todayRecord.breaks.find(b => !b.endTime));
+
+      if (isClockedIn && !isClockedOut && !isOnBreak) {
+        preventLogout = true;
+        message = 'Please take a break or clock out before logging out.';
+      }
+    }
+
+    if (preventLogout) {
+      toast.error(message);
       return;
     }
     logout();
@@ -36,10 +55,20 @@ export default function Topbar() {
 
       
       {/* White Header */}
-      <div className="h-16 bg-white border-b border-gray-100 flex items-center px-8 shadow-sm">
+      <div className="h-16 bg-white border-b border-gray-100 flex items-center px-4 md:px-8 shadow-sm">
+        {/* Mobile Hamburger Menu (Admin Only) */}
+        {user?.role === 'Admin' && (
+          <button 
+            className="lg:hidden p-2 mr-2 text-gray-500 hover:text-teal-600 focus:outline-none"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
+
         {/* Left Side: Brand (for User) or Empty (for Admin since they have Sidebar) */}
         {user?.role !== 'Admin' && (
-          <div className="flex items-center text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 mr-10 font-black text-xl tracking-tighter">
+          <div className="flex items-center text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 mr-4 md:mr-10 font-black text-lg md:text-xl tracking-tighter shrink-0">
             <svg className="w-6 h-6 mr-2 fill-current text-teal-500" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
             WorkforcePro
           </div>
@@ -47,7 +76,7 @@ export default function Topbar() {
 
         {/* Center/Left: Navigation Links for Non-Admin */}
         {user?.role !== 'Admin' && (
-          <nav className="flex items-center space-x-2 flex-1">
+          <nav className="flex items-center space-x-1 md:space-x-2 flex-1 overflow-x-auto custom-scrollbar pb-1">
             {[
               { path: '/', label: 'Dashboard' },
               { path: '/attendance', label: 'Attendance' },

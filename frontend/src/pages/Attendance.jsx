@@ -84,7 +84,7 @@ export default function Attendance() {
 
     return (
       <div className="max-w-3xl mx-auto mt-8 animate-fade-in-up">
-        <div className="app-card p-10 flex flex-col items-center text-center relative overflow-hidden">
+        <div className="app-card p-6 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-400 to-indigo-500"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-teal-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none opacity-60"></div>
           
@@ -94,7 +94,7 @@ export default function Attendance() {
           <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-indigo-700 mb-2 relative z-10 tracking-tight">Daily Attendance</h2>
           <p className="text-gray-500 font-medium mb-10 relative z-10">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
-          <div className="grid grid-cols-2 gap-6 w-full mb-10 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 w-full mb-10 relative z-10">
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-center mb-3 text-teal-600">
                 <PlayCircle className="w-5 h-5 mr-2 opacity-70" />
@@ -127,27 +127,27 @@ export default function Attendance() {
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 relative z-10">
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 relative z-10 w-full">
             {!todayRecord?.clockIn ? (
-              <button type="button" onClick={() => handleBtnClick('clock-in')} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-lg hover:shadow-teal-500/30 flex items-center px-10 py-4 rounded-xl text-lg font-bold transition-all transform hover:-translate-y-1">
+              <button type="button" onClick={() => handleBtnClick('clock-in')} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-lg hover:shadow-teal-500/30 flex items-center justify-center px-8 md:px-10 py-3 md:py-4 rounded-xl text-base md:text-lg font-bold transition-all transform hover:-translate-y-1 w-full sm:w-auto">
                 <PlayCircle className="w-6 h-6 mr-2" /> Clock In
               </button>
             ) : !isClockedOut ? (
               <>
                 {!isOnBreak ? (
                   <>
-                    <button type="button" onClick={() => handleBtnClick('break/start', { type: 'Break' })} className="bg-yellow-500 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/30 text-white flex items-center px-6 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
+                    <button type="button" onClick={() => handleBtnClick('break/start', { type: 'Break' })} className="bg-yellow-500 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/30 text-white flex items-center justify-center px-4 md:px-6 py-3 md:py-4 rounded-xl text-sm md:text-base font-bold transition-all transform hover:-translate-y-1 w-full sm:w-auto">
                       <Coffee className="w-5 h-5 mr-2" /> Take Break
                     </button>
-                    <button type="button" onClick={() => handleBtnClick('break/start', { type: 'Lunch' })} className="bg-orange-500 hover:bg-orange-600 shadow-lg hover:shadow-orange-500/30 text-white flex items-center px-6 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
+                    <button type="button" onClick={() => handleBtnClick('break/start', { type: 'Lunch' })} className="bg-orange-500 hover:bg-orange-600 shadow-lg hover:shadow-orange-500/30 text-white flex items-center justify-center px-4 md:px-6 py-3 md:py-4 rounded-xl text-sm md:text-base font-bold transition-all transform hover:-translate-y-1 w-full sm:w-auto">
                       <StopCircle className="w-5 h-5 mr-2" /> Take Lunch
                     </button>
-                    <button type="button" onClick={() => handleBtnClick('clock-out')} className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-red-500/30 text-white flex items-center px-8 py-4 rounded-xl text-base font-bold transition-all transform hover:-translate-y-1">
+                    <button type="button" onClick={() => handleBtnClick('clock-out')} className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-red-500/30 text-white flex items-center justify-center px-6 md:px-8 py-3 md:py-4 rounded-xl text-sm md:text-base font-bold transition-all transform hover:-translate-y-1 w-full sm:w-auto">
                       <LogOut className="w-5 h-5 mr-2" /> Clock Out
                     </button>
                   </>
                 ) : (
-                  <button type="button" onClick={() => handleBtnClick('break/end')} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg hover:shadow-teal-500/30 text-white flex items-center px-10 py-4 rounded-xl text-lg font-bold transition-all transform hover:-translate-y-1">
+                  <button type="button" onClick={() => handleBtnClick('break/end')} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg hover:shadow-teal-500/30 text-white flex items-center justify-center px-8 md:px-10 py-3 md:py-4 rounded-xl text-base md:text-lg font-bold transition-all transform hover:-translate-y-1 w-full sm:w-auto">
                     <PlayCircle className="w-6 h-6 mr-2" /> Resume Work
                   </button>
                 )}
@@ -182,19 +182,19 @@ export default function Attendance() {
 
   const renderAdminView = () => {
     return (
-      <div className="flex flex-col h-full space-y-6 py-4">
-        <div className="flex items-center justify-between mb-2 animate-fade-in-up">
+      <div className="flex flex-col h-full space-y-4 md:space-y-6 py-2 md:py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 animate-fade-in-up gap-4">
           <div className="flex items-center">
-            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 tracking-tight flex items-center">
-              <UserCheck className="w-8 h-8 mr-3 text-teal-500" /> Employee Attendance
+            <h1 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 tracking-tight flex items-center">
+              <UserCheck className="w-6 h-6 md:w-8 md:h-8 mr-3 text-teal-500" /> Employee Attendance
             </h1>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <input 
               type="date" 
               value={dateFilter} 
               onChange={(e) => setDateFilter(e.target.value)} 
-              className="app-input shadow-sm font-medium px-4 py-2"
+              className="app-input shadow-sm font-medium px-4 py-2 w-full"
             />
           </div>
         </div>
@@ -204,8 +204,8 @@ export default function Attendance() {
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none opacity-50"></div>
           
           <div className="flex-1 overflow-auto bg-white/40 backdrop-blur-sm p-6 relative z-10">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-              <table className="w-full text-sm text-left">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+              <table className="w-full text-sm text-left whitespace-nowrap min-w-max">
                 <thead className="text-xs text-gray-500 bg-gray-50/80 border-b border-gray-200/60 uppercase tracking-wider">
                   <tr>
                     <th className="px-6 py-4 font-bold">Date</th>
