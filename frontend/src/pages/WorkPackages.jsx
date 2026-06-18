@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
+import { exportToCSV } from '../utils/exportUtils';
+import { Download } from 'lucide-react';
 
 export default function WorkPackages() {
   const { user } = useAuthStore();
@@ -49,12 +51,27 @@ export default function WorkPackages() {
     ? assignments 
     : assignments.filter(a => a.project?._id === filterProject);
 
+  const handleExport = () => {
+    const exportData = filteredAssignments.map(a => ({
+      Task: a.name,
+      Project: a.project?.name || '-',
+      User: a.user?.name || 'Unknown',
+      EstimatedHours: (a.estimatedHours || 0).toFixed(1),
+      TimeSpent: (a.timeSpent || 0).toFixed(2),
+      Status: a.status
+    }));
+    exportToCSV(exportData, 'Timesheets_Export');
+  };
+
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col space-y-6 py-4">
       <div className="flex items-center justify-between mb-2 animate-fade-in-up">
         <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600 tracking-tight">
           {user?.role === 'Admin' ? 'Timesheets' : 'My Tasks'}
         </h1>
+        <button onClick={handleExport} className="bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center shadow-sm">
+          <Download className="w-4 h-4 mr-2" /> Export
+        </button>
       </div>
 
       <div className="app-card flex-1 overflow-hidden flex flex-col animate-fade-in-up animate-stagger-1 relative">

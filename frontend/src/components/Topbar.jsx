@@ -1,9 +1,11 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useTimerStore from '../store/timerStore';
 import useAuthStore from '../store/authStore';
 import useAttendanceStore from '../store/attendanceStore';
 import { Play, Square, Bell, Search, LogOut, Menu } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from '../api/axios';
 
 export default function Topbar({ setMobileMenuOpen }) {
   const isTracking = useTimerStore(state => state.isTracking);
@@ -14,6 +16,64 @@ export default function Topbar({ setMobileMenuOpen }) {
   const todayRecord = useAttendanceStore(state => state.todayRecord);
   const location = useLocation();
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user) {
+        try {
+          const endpoint = user.role === 'Admin' ? '/work' : '/work/me';
+          const [tasksRes, projectsRes] = await Promise.all([
+            axios.get(endpoint),
+            axios.get('/projects')
+          ]);
+          
+          let notifs = [];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          tasksRes.data.forEach(task => {
+            if (task.status !== 'Completed' && task.dueDate) {
+              const due = new Date(task.dueDate);
+              due.setHours(0, 0, 0, 0);
+              if (due < today) {
+                notifs.push({
+                   _id: 'task_' + task._id,
+                   type: 'Task',
+                   name: task.name,
+                   context: task.project?.name || '-',
+                   date: task.dueDate
+                });
+              }
+            }
+          });
+
+          projectsRes.data.forEach(project => {
+            if (project.status !== 'Completed' && project.endDate) {
+              const due = new Date(project.endDate);
+              due.setHours(0, 0, 0, 0);
+              if (due < today) {
+                notifs.push({
+                   _id: 'proj_' + project._id,
+                   type: 'Project',
+                   name: project.name,
+                   context: project.client?.name || project.customer || '-',
+                   date: project.endDate
+                });
+              }
+            }
+          });
+          
+          notifs.sort((a, b) => new Date(a.date) - new Date(b.date));
+          setNotifications(notifs);
+        } catch (error) {
+          console.error("Failed to fetch notifications", error);
+        }
+      }
+    };
+    fetchData();
+  }, [user]);
 
   const handleLogout = () => {
     let preventLogout = false;
@@ -54,8 +114,8 @@ export default function Topbar({ setMobileMenuOpen }) {
     <div className="w-full shrink-0 flex flex-col z-10 relative">
 
       
-      {/* White Header */}
-      <div className="h-16 bg-white border-b border-gray-100 flex items-center px-4 md:px-8 shadow-sm">
+      {/* Glass Header */}
+      <div className="h-16 bg-white/40 backdrop-blur-xl border-b border-white/50 flex items-center px-4 md:px-8 shadow-sm relative z-50">
         {/* Mobile Hamburger Menu (Admin Only) */}
         {user?.role === 'Admin' && (
           <button 
@@ -123,10 +183,44 @@ export default function Topbar({ setMobileMenuOpen }) {
 
           {/* Chat/Notification Icons */}
           <div className="flex items-center space-x-4 text-gray-400">
-            <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors group">
-              <Bell className="w-5 h-5 group-hover:text-teal-500 transition-colors" />
-              <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
-            </button>
+            <div className="relative">
+              <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 rounded-full hover:bg-gray-100 transition-colors group">
+                <Bell className="w-5 h-5 group-hover:text-teal-500 transition-colors" />
+                {notifications.length > 0 && (
+                  <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 ring-2 ring-white"></span>
+                  </span>
+                )}
+              </button>
+              
+              {showNotifications && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-fade-in-up">
+                  <div className="p-4 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+                    <h3 className="font-bold text-gray-800">Notifications</h3>
+                    <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-0.5 rounded-full">{notifications.length} Overdue</span>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-gray-500 text-sm font-medium">No new notifications</div>
+                    ) : (
+                      <div className="divide-y divide-gray-50">
+                        {notifications.map(item => (
+                          <div key={item._id} className="p-4 hover:bg-rose-50/30 transition-colors relative">
+                            <span className={`absolute top-4 right-4 text-[10px] font-bold px-2 py-0.5 rounded-md ${item.type === 'Project' ? 'bg-indigo-100 text-indigo-700' : 'bg-teal-100 text-teal-700'}`}>{item.type}</span>
+                            <p className="font-bold text-gray-800 text-sm pr-12">{item.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">{item.type === 'Project' ? 'Client: ' : 'Project: '}{item.context}</p>
+                            <p className="text-xs text-rose-500 font-semibold mt-2">
+                              Overdue since: {new Date(item.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             {user?.role !== 'Admin' && (
               <button 
                 onClick={handleLogout} 

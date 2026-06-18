@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
-import { UserPlus, KeyRound, Users } from 'lucide-react';
+import { UserPlus, KeyRound, Users, Download } from 'lucide-react';
+import { exportToCSV } from '../utils/exportUtils';
 
 export default function AdminPanel() {
   const [users, setUsers] = useState([]);
@@ -81,6 +82,15 @@ export default function AdminPanel() {
     }
   };
 
+  const handleExport = () => {
+    const exportData = users.map(u => ({
+      Name: u.name,
+      Email: u.email,
+      Role: u.role
+    }));
+    exportToCSV(exportData, 'Users_Export');
+  };
+
   return (
     <div className="max-w-6xl mx-auto h-full flex flex-col space-y-8 py-4">
       <div className="flex items-center justify-between animate-fade-in-up">
@@ -149,37 +159,40 @@ export default function AdminPanel() {
       </div>
 
       <div className="app-card p-0 overflow-hidden flex flex-col animate-fade-in-up animate-stagger-3 relative">
-        <div className="p-6 border-b border-gray-100/50 bg-white/50 flex items-center justify-between">
+        <div className="p-6 border-b border-white/40 bg-white/30 backdrop-blur-md flex items-center justify-between">
           <h3 className="font-bold text-gray-800 text-xl flex items-center">
              <Users className="w-6 h-6 mr-3 text-indigo-500" /> Directory
           </h3>
+          <button onClick={handleExport} className="bg-white/60 backdrop-blur border border-white/50 text-gray-700 hover:bg-white/80 px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center shadow-sm">
+            <Download className="w-4 h-4 mr-2" /> Export
+          </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 bg-gray-50/80 border-b border-gray-200/60 uppercase tracking-wider">
+            <thead className="text-[11px] text-gray-500 bg-white/30 border-b border-white/40 uppercase tracking-widest font-black">
               <tr>
-                <th className="px-6 py-4 font-bold">Name</th>
-                <th className="px-6 py-4 font-bold">Email</th>
-                <th className="px-6 py-4 font-bold">Role</th>
-                <th className="px-6 py-4 font-bold text-right">Actions</th>
+                <th className="px-6 py-5">Name</th>
+                <th className="px-6 py-5">Email</th>
+                <th className="px-6 py-5">Role</th>
+                <th className="px-6 py-5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {(users || []).map(u => (
-                <tr key={u._id} className="hover:bg-teal-50/30 transition-colors group">
+                <tr key={u._id} className="hover:bg-white/40 transition-colors group">
                   <td className="px-6 py-4 text-gray-800 font-bold">
                     {editingUserId === u._id ? (
                       <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="app-input px-3 py-1.5 text-sm" />
                     ) : (
                       <div className="flex items-center space-x-3">
-                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-110 transition-transform">
                            {u.name.substring(0,2).toUpperCase()}
                          </div>
-                         <span>{u.name}</span>
+                         <span className="tracking-tight">{u.name}</span>
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-gray-600 font-medium">{u.email}</td>
+                  <td className="px-6 py-4 text-gray-600 font-bold">{u.email}</td>
                   <td className="px-6 py-4">
                     {editingUserId === u._id ? (
                       <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="app-input px-3 py-1.5 text-sm">
@@ -188,10 +201,10 @@ export default function AdminPanel() {
                         <option value="Admin">Admin</option>
                       </select>
                     ) : (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        u.role === 'Admin' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
-                        u.role === 'Manager' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-                        'bg-gray-100 text-gray-700 border border-gray-200'
+                      <span className={`px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-bold backdrop-blur-sm shadow-sm ${
+                        u.role === 'Admin' ? 'bg-purple-100/50 text-purple-700 border border-purple-200' :
+                        u.role === 'Manager' ? 'bg-blue-100/50 text-blue-700 border border-blue-200' :
+                        'bg-white/60 text-gray-700 border border-white/60'
                       }`}>
                         {u.role}
                       </span>
@@ -200,8 +213,8 @@ export default function AdminPanel() {
                   <td className="px-6 py-4 text-right">
                     {editingUserId === u._id ? (
                       <div className="flex justify-end space-x-2">
-                        <button onClick={() => handleUpdateUser(u._id)} className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Save</button>
-                        <button onClick={() => setEditingUserId(null)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">Cancel</button>
+                        <button onClick={() => handleUpdateUser(u._id)} className="bg-emerald-100/50 backdrop-blur border border-emerald-200 text-emerald-700 hover:bg-emerald-200/50 px-3 py-1.5 rounded-lg font-bold text-xs transition-all">Save</button>
+                        <button onClick={() => setEditingUserId(null)} className="bg-white/50 backdrop-blur border border-white/60 text-gray-700 hover:bg-white/80 px-3 py-1.5 rounded-lg font-bold text-xs transition-all">Cancel</button>
                       </div>
                     ) : (
                       <div className="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">

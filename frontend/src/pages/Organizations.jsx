@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from '../api/axios';
-import { Building2, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Building2, Plus, Edit2, Trash2, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { exportToCSV } from '../utils/exportUtils';
 
 export default function Organizations() {
   const [organizations, setOrganizations] = useState([]);
@@ -29,6 +30,16 @@ export default function Organizations() {
     }
   };
 
+  const handleExport = () => {
+    const exportData = organizations.map(org => ({
+      Name: org.name,
+      Email: org.email,
+      Status: org.isActive ? 'Active' : 'Inactive',
+      JoinedDate: new Date(org.createdAt).toLocaleDateString()
+    }));
+    exportToCSV(exportData, 'Organizations_Export');
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center mb-6">
@@ -36,10 +47,15 @@ export default function Organizations() {
           <h1 className="text-2xl font-bold text-gray-800">Organizations</h1>
           <p className="text-sm text-gray-500 mt-1">Manage tenant organizations and their details</p>
         </div>
-        <button className="app-btn-primary flex items-center px-4 py-2">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Organization
-        </button>
+        <div className="flex space-x-3">
+          <button onClick={handleExport} className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded shadow-sm text-sm font-medium flex items-center">
+            <Download className="w-4 h-4 mr-2" /> Export
+          </button>
+          <button className="app-btn-primary flex items-center px-4 py-2">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Organization
+          </button>
+        </div>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">

@@ -9,7 +9,7 @@ export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f3f4f6]">
+    <div className="flex h-screen overflow-hidden bg-transparent">
       {user?.role === 'Admin' && (
         <>
           {/* Mobile Overlay */}

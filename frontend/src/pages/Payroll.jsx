@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import { IndianRupee, FileText, Download, CheckCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { exportToCSV } from '../utils/exportUtils';
 
 export default function Payroll() {
   const [payrolls, setPayrolls] = useState([]);
@@ -42,6 +43,18 @@ export default function Payroll() {
     } finally {
       setIsRunning(false);
     }
+  };
+
+  const handleExport = () => {
+    const exportData = payrolls.map(p => ({
+      Employee: p.user?.name || 'Unknown',
+      Email: p.user?.email || '',
+      Period: `${getMonthName(p.month)} ${p.year}`,
+      BasicSalary: p.basicSalary,
+      NetPay: p.netPay,
+      Status: p.status
+    }));
+    exportToCSV(exportData, 'Payroll_Export');
   };
 
   const handleStatusChange = async (id, newStatus) => {
@@ -103,7 +116,7 @@ export default function Payroll() {
           <p className="text-gray-500 font-medium text-sm mt-1">Manage employee salaries and view payment history</p>
         </div>
         <div className="flex space-x-3">
-           <button className="bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center shadow-sm">
+           <button onClick={handleExport} className="bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center shadow-sm">
              <FileText className="w-4 h-4 mr-2" />
              Export Report
            </button>

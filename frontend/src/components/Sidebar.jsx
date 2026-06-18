@@ -4,9 +4,9 @@ import useTimerStore from '../store/timerStore';
 import useAttendanceStore from '../store/attendanceStore';
 import toast from 'react-hot-toast';
 import { 
-  Star, LayoutDashboard, Radio, Laptop, Clock, FileText, 
-  CheckSquare, Calendar, LogIn, Plane, FolderKanban, Receipt, Users, 
-  UsersRound, Settings, Blocks, Building2, UserPlus, HelpCircle, UserCheck
+  Star, Command, Activity, MonitorPlay, Timer, PieChart, 
+  ListTodo, CalendarDays, LogIn, Plane, KanbanSquare, Receipt, Users, 
+  Network, Settings, Puzzle, Building2, UserPlus, HelpCircle, ScanFace, CreditCard
 } from 'lucide-react';
 
 import { X } from 'lucide-react';
@@ -56,21 +56,47 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
     </div>
   );
 
+  const getGradient = (to) => {
+    switch(to) {
+      case '/': return 'from-blue-500 to-indigo-500 shadow-blue-500/20';
+      case '/live': return 'from-rose-500 to-pink-500 shadow-rose-500/20';
+      case '/work-packages': return 'from-orange-500 to-amber-500 shadow-orange-500/20';
+      case '/reports': return 'from-emerald-500 to-teal-500 shadow-emerald-500/20';
+      case '/attendance': return 'from-cyan-500 to-blue-500 shadow-cyan-500/20';
+      case '/assign-work': return 'from-violet-500 to-purple-500 shadow-violet-500/20';
+      case '/leave-request': return 'from-fuchsia-500 to-pink-500 shadow-fuchsia-500/20';
+      case '/projects': return 'from-indigo-500 to-blue-500 shadow-indigo-500/20';
+      case '/invoice': return 'from-green-500 to-emerald-500 shadow-green-500/20';
+      case '/clients': return 'from-amber-500 to-orange-500 shadow-amber-500/20';
+      case '/screenshots': return 'from-sky-500 to-cyan-500 shadow-sky-500/20';
+      case '/teams': return 'from-purple-500 to-fuchsia-500 shadow-purple-500/20';
+      case '/admin': return 'from-blue-500 to-indigo-500 shadow-blue-500/20';
+      case '/payroll': return 'from-teal-500 to-emerald-500 shadow-teal-500/20';
+      case '/integrations': return 'from-rose-500 to-orange-500 shadow-rose-500/20';
+      default: return 'from-gray-400 to-gray-500 shadow-gray-500/20';
+    }
+  };
+
   const NavItem = ({ to, icon: Icon, text, badge }) => (
     <Link 
       to={to} 
       onClick={() => setMobileMenuOpen?.(false)}
-      className={`flex items-center px-4 py-2.5 mx-3 my-1 rounded-xl transition-all duration-200 text-[13px] font-bold ${isActive(to) ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-md shadow-teal-500/20 transform scale-[1.02]' : 'text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:scale-[1.01]'}`}>
-      <Icon className={`w-[18px] h-[18px] mr-3 ${isActive(to) ? 'text-white' : 'text-gray-400 group-hover:text-teal-500'}`} /> 
-      <span className="flex-1">{text}</span>
+      className={`flex items-center px-3 py-2 mx-3 my-1 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] text-[13px] font-bold group ${isActive(to) ? 'bg-white/60 shadow-sm backdrop-blur-xl border border-white/80 scale-[1.02]' : 'hover:bg-white/40 hover:shadow-sm border border-transparent hover:scale-[1.01]'}`}>
+      
+      <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center mr-3 transition-all duration-300 group-hover:scale-[1.15] group-hover:rotate-3 ${isActive(to) ? `bg-gradient-to-br ${getGradient(to)} text-white shadow-lg` : `bg-white/80 text-gray-400 border border-gray-100 group-hover:text-gray-700 group-hover:border-white group-hover:shadow-md`}`}>
+        <Icon className="w-[16px] h-[16px]" strokeWidth={2.5} /> 
+      </div>
+      
+      <span className={`flex-1 ${isActive(to) ? 'text-gray-800' : 'text-gray-500 group-hover:text-gray-800'}`}>{text}</span>
+      
       {badge && (
-        <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ml-2 ${isActive(to) ? 'bg-white/20 text-white' : 'bg-teal-100 text-teal-700'}`}>NEW</span>
+        <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full ml-2 bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm border border-teal-300/50">NEW</span>
       )}
     </Link>
   );
 
   return (
-    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-100 flex flex-col h-full shrink-0 shadow-xl lg:shadow-sm lg:relative transform transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white/40 backdrop-blur-2xl border-r border-white/50 flex flex-col h-full shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] lg:relative transform transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       
       {/* Decorative Blur */}
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-teal-50/50 to-transparent pointer-events-none"></div>
@@ -94,39 +120,39 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
       
       <nav className="flex-1 overflow-y-auto pb-4 custom-scrollbar relative z-10">
         <NavSection title="Analyze" />
-        <NavItem to="/" icon={LayoutDashboard} text="Dashboard" />
+        <NavItem to="/" icon={Command} text="Dashboard" />
         {user?.role === 'Admin' && (
           <>
-            <NavItem to="/live" icon={Radio} text="Live Feed" />
-            <NavItem to="/work-packages" icon={Clock} text="Timesheets" />
-            <NavItem to="/reports" icon={FileText} text="Reports" />
+            <NavItem to="/live" icon={Activity} text="Live Feed" />
+            <NavItem to="/work-packages" icon={Timer} text="Timesheets" />
+            <NavItem to="/reports" icon={PieChart} text="Reports" />
           </>
         )}
 
         <NavSection title="Manage" />
-        <NavItem to="/attendance" icon={UserCheck} text="Attendance" badge="NEW" />
+        <NavItem to="/attendance" icon={ScanFace} text="Attendance" badge="NEW" />
         {user?.role === 'Admin' ? (
-          <NavItem to="/assign-work" icon={CheckSquare} text="Assign Tasks" />
+          <NavItem to="/assign-work" icon={ListTodo} text="Assign Tasks" />
         ) : (
-          <NavItem to="/work-packages" icon={CheckSquare} text="Tasks" />
+          <NavItem to="/work-packages" icon={ListTodo} text="Tasks" />
         )}
-        <NavItem to="/leave-request" icon={Calendar} text="Leave Request" />
-        <NavItem to="/projects" icon={FolderKanban} text="Projects" />
+        <NavItem to="/leave-request" icon={CalendarDays} text="Leave Request" />
+        <NavItem to="/projects" icon={KanbanSquare} text="Projects" />
         {user?.role === 'Admin' && (
           <>
             <NavItem to="/invoice" icon={Receipt} text="Invoice" />
-            <NavItem to="/clients" icon={UsersRound} text="Clients" badge="NEW" />
+            <NavItem to="/clients" icon={Users} text="Clients" badge="NEW" />
           </>
         )}
 
         {user?.role === 'Admin' && (
           <>
             <NavSection title="Admin" />
-            <NavItem to="/screenshots" icon={Laptop} text="Screenshots" />
-            <NavItem to="/teams" icon={Users} text="Teams" />
+            <NavItem to="/screenshots" icon={MonitorPlay} text="Screenshots" />
+            <NavItem to="/teams" icon={Network} text="Teams" />
             <NavItem to="/admin" icon={UserPlus} text="Members" />
-            <NavItem to="/payroll" icon={FileText} text="Payroll" />
-            <NavItem to="/integrations" icon={Blocks} text="Integrations" badge="NEW" />
+            <NavItem to="/payroll" icon={CreditCard} text="Payroll" />
+            <NavItem to="/integrations" icon={Puzzle} text="Integrations" badge="NEW" />
           </>
         )}
 

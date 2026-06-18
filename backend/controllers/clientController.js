@@ -1,9 +1,20 @@
 import Client from '../models/Client.js';
+import Project from '../models/Project.js';
 
 export const getClients = async (req, res) => {
   try {
     const clients = await Client.find({});
-    res.json(clients);
+    const projects = await Project.find({ client: { $in: clients.map(c => c._id) } });
+    
+    const clientsWithProjects = clients.map(c => {
+      const clientProjects = projects.filter(p => p.client && p.client.toString() === c._id.toString());
+      return {
+        ...c._doc,
+        projects: clientProjects
+      };
+    });
+    
+    res.json(clientsWithProjects);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

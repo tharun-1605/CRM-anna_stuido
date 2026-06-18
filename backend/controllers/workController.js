@@ -1,12 +1,13 @@
 import WorkPackage from '../models/WorkPackage.js';
 import TimeLog from '../models/TimeLog.js';
 import Team from '../models/Team.js';
+import Project from '../models/Project.js';
 
 // @desc    Assign work to user or team (Admin)
 // @route   POST /api/work
 export const assignWork = async (req, res) => {
   try {
-    const { user, team, project, name, estimatedHours } = req.body;
+    const { user, team, project, name, estimatedHours, priority, dueDate } = req.body;
     
     if (team) {
       const teamDoc = await Team.findById(team);
@@ -18,7 +19,9 @@ export const assignWork = async (req, res) => {
             user: memberId,
             project,
             name,
-            estimatedHours
+            estimatedHours,
+            priority,
+            dueDate
           })
         )
       );
@@ -28,7 +31,9 @@ export const assignWork = async (req, res) => {
         user,
         project,
         name,
-        estimatedHours
+        estimatedHours,
+        priority,
+        dueDate
       });
       return res.status(201).json(workPackage);
     } else {
@@ -108,6 +113,21 @@ export const addTimeLog = async (req, res) => {
 export const updateWorkPackage = async (req, res) => {
   try {
     const work = await WorkPackage.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    
+    if (work) {
+      const allWork = await WorkPackage.find({ project: work.project });
+      const allCompleted = allWork.length > 0 && allWork.every(wp => wp.status === 'Completed');
+      
+      if (allCompleted) {
+        await Project.findByIdAndUpdate(work.project, { status: 'Completed' });
+      } else if (req.body.status && req.body.status !== 'Completed') {
+        const project = await Project.findById(work.project);
+        if (project && project.status === 'Completed') {
+          await Project.findByIdAndUpdate(work.project, { status: 'In Progress' });
+        }
+      }
+    }
+
     res.json(work);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };

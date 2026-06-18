@@ -122,7 +122,7 @@ export default function UserDashboard() {
                     <h4 className="font-bold text-gray-800 text-sm group-hover:text-blue-600 transition-colors">{p.name}</h4>
                     {p.customer && <p className="text-xs text-gray-500 font-medium mt-1">{p.customer}</p>}
                   </div>
-                  <span className="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-100">Assigned</span>
+                  <span className="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-100">{p.status || 'Assigned'}</span>
                 </div>
               ))
             )}

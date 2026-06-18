@@ -3,6 +3,7 @@ import axios from '../api/axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
 import { FileText, Download, Clock } from 'lucide-react';
+import { exportToCSV } from '../utils/exportUtils';
 
 export default function Reports() {
   const { user } = useAuthStore();
@@ -42,22 +43,15 @@ export default function Reports() {
   }, [user]);
 
   const handleDownloadCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Date,User,Project,Task,Duration(hrs),Status\n";
-    logs.forEach(row => {
-      const date = new Date(row.startTime).toLocaleDateString();
-      const duration = (row.duration || 0).toFixed(2);
-      const csvRow = `"${date}","${row.userName}","${row.projectName || ''}","${row.workPackageName || ''}","${duration}","${row.status || ''}"`;
-      csvContent += csvRow + "\r\n";
-    });
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "timesheet_report.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const exportData = logs.map(row => ({
+      Date: new Date(row.startTime).toLocaleDateString(),
+      User: row.userName,
+      Project: row.projectName || '',
+      Task: row.workPackageName || '',
+      Duration: (row.duration || 0).toFixed(2),
+      Status: row.status || ''
+    }));
+    exportToCSV(exportData, 'timesheet_report');
   };
 
   return (

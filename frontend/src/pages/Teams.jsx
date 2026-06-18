@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, Download } from 'lucide-react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
+import { exportToCSV } from '../utils/exportUtils';
 
 export default function Teams() {
   const [teams, setTeams] = useState([]);
@@ -10,6 +11,7 @@ export default function Teams() {
   const [formData, setFormData] = useState({ name: '', description: '', members: [] });
   const [editingTeamId, setEditingTeamId] = useState(null);
   const [editName, setEditName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchData = async () => {
     try {
@@ -73,6 +75,24 @@ export default function Teams() {
     });
   };
 
+  const handleExport = () => {
+    const filteredTeams = teams.filter(t => {
+      const term = searchTerm.toLowerCase();
+      if (!term) return true;
+      const matchesName = t.name?.toLowerCase().includes(term);
+      const matchesMember = t.members?.some(m => m.name?.toLowerCase().includes(term));
+      return matchesName || matchesMember;
+    });
+
+    const exportData = filteredTeams.map(t => ({
+      TeamName: t.name,
+      Description: t.description || '',
+      MembersCount: t.members?.length || 0,
+      Members: t.members?.map(m => m.name).join(' | ') || ''
+    }));
+    exportToCSV(exportData, 'Teams_Export');
+  };
+
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col space-y-6 py-4">
       <div className="flex items-center justify-between mb-2 animate-fade-in-up">
@@ -80,9 +100,14 @@ export default function Teams() {
           <Users className="w-8 h-8 mr-3 text-teal-500" />
           Teams
         </h1>
-        <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all">
-          <Plus className="w-5 h-5 mr-2" /> Add Team
-        </button>
+        <div className="flex space-x-3">
+          <button onClick={handleExport} className="bg-white/60 backdrop-blur border border-white/50 text-gray-700 hover:bg-white/80 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center shadow-sm">
+            <Download className="w-4 h-4 mr-2" /> Export
+          </button>
+          <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all rounded-xl">
+            <Plus className="w-5 h-5 mr-2" /> Add Team
+          </button>
+        </div>
       </div>
 
       {isFormOpen && (
@@ -106,18 +131,18 @@ export default function Teams() {
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Select Members</label>
               <div className="flex-1 overflow-y-auto border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-2 shadow-inner">
                 {users.map(u => (
-                  <label key={u._id} className="flex items-center space-x-3 text-sm text-gray-700 cursor-pointer bg-white p-3 rounded-lg border border-gray-100 hover:border-teal-300 hover:shadow-sm transition-all">
+                  <label key={u._id} className="flex items-center space-x-3 text-sm text-gray-700 cursor-pointer bg-white/60 backdrop-blur p-3 rounded-xl border border-white/60 hover:border-teal-400 hover:shadow-md transition-all">
                     <input 
                       type="checkbox" 
                       checked={formData.members.includes(u._id)}
                       onChange={() => handleMemberToggle(u._id)}
-                      className="w-4 h-4 rounded text-teal-500 focus:ring-teal-500 border-gray-300" 
+                      className="w-4 h-4 rounded text-teal-500 focus:ring-teal-500 border-gray-300 shadow-inner" 
                     />
                     <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-extrabold text-[10px] mr-3 shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-black text-xs mr-3 shadow-sm">
                         {u.name.substring(0,2).toUpperCase()}
                       </div>
-                      <span className="font-bold">{u.name} <span className="text-gray-400 font-medium">({u.email})</span></span>
+                      <span className="font-bold tracking-tight">{u.name} <span className="text-gray-400 font-medium">({u.email})</span></span>
                     </div>
                   </label>
                 ))}
@@ -135,65 +160,74 @@ export default function Teams() {
           <div className="w-1/2">
             <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">Search Team</label>
             <div className="relative">
-               <input type="text" placeholder="Search by team & member name..." className="app-input w-full pl-4 pr-10 py-2 text-sm shadow-sm" />
+               <input type="text" placeholder="Search by team & member name..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="app-input w-full pl-4 pr-10 py-2 text-sm shadow-sm" />
             </div>
           </div>
         </div>
         
         <div className="flex-1 overflow-auto relative z-10 custom-scrollbar">
-          {teams.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-24 bg-white/40 rounded-xl border border-gray-100/50">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                <Users className="w-10 h-10 text-gray-400" />
+          {(() => {
+            const filteredTeams = teams.filter(t => {
+              const term = searchTerm.toLowerCase();
+              if (!term) return true;
+              const matchesName = t.name?.toLowerCase().includes(term);
+              const matchesMember = t.members?.some(m => m.name?.toLowerCase().includes(term));
+              return matchesName || matchesMember;
+            });
+
+            return filteredTeams.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full py-24 bg-white/30 backdrop-blur rounded-3xl border border-white/40 shadow-sm">
+              <div className="w-24 h-24 bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-inner border border-white/60">
+                <Users className="w-12 h-12 text-gray-400" />
               </div>
-              <h2 className="text-gray-600 font-extrabold text-xl mb-2">No teams found</h2>
-              <p className="text-gray-400 font-medium text-sm">Create a new team to start collaborating.</p>
+              <h2 className="text-gray-600 font-black text-2xl mb-2 tracking-tight">No teams found</h2>
+              <p className="text-gray-500 font-medium text-base">Create a new team to start collaborating.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
-              {teams.map(team => (
-                <div key={team._id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all transform hover:-translate-y-1 relative group overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              {filteredTeams.map(team => (
+                <div key={team._id} className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all ease-[cubic-bezier(0.34,1.56,0.64,1)] duration-500 hover:-translate-y-1 relative group overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-teal-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
                   <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     {editingTeamId === team._id ? (
                       <div className="flex space-x-2">
-                        <button onClick={() => handleUpdate(team._id)} className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-xs font-bold transition-colors">Save</button>
-                        <button onClick={() => setEditingTeamId(null)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1 rounded-md text-xs font-bold transition-colors">Cancel</button>
+                        <button onClick={() => handleUpdate(team._id)} className="bg-emerald-100/50 backdrop-blur border border-emerald-200 text-emerald-700 hover:bg-emerald-200/50 px-3 py-1 rounded-xl text-xs font-bold transition-colors">Save</button>
+                        <button onClick={() => setEditingTeamId(null)} className="bg-white/50 backdrop-blur border border-white/60 text-gray-700 hover:bg-white/80 px-3 py-1 rounded-xl text-xs font-bold transition-colors">Cancel</button>
                       </div>
                     ) : (
-                      <div className="flex space-x-2 bg-white rounded-lg shadow-sm border border-gray-100 p-1">
-                        <button onClick={() => startEdit(team)} className="text-teal-600 hover:bg-teal-50 px-2 py-1 rounded text-xs font-bold transition-colors">Edit</button>
-                        <button onClick={() => handleDeleteTeam(team._id)} className="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs font-bold transition-colors">Delete</button>
+                      <div className="flex space-x-2 bg-white/60 backdrop-blur rounded-xl shadow-sm border border-white/60 p-1">
+                        <button onClick={() => startEdit(team)} className="text-teal-600 hover:bg-white/80 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all">Edit</button>
+                        <button onClick={() => handleDeleteTeam(team._id)} className="text-red-500 hover:bg-white/80 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all">Delete</button>
                       </div>
                     )}
                   </div>
 
                   <div className="mb-4 pt-2">
                     {editingTeamId === team._id ? (
-                      <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="app-input px-3 py-1.5 text-sm w-3/4 mb-2 font-bold" />
+                      <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="app-input px-3 py-1.5 text-sm w-3/4 mb-2 font-black" />
                     ) : (
-                      <h3 className="text-xl font-black text-gray-800 mb-1 group-hover:text-teal-700 transition-colors">{team.name}</h3>
+                      <h3 className="text-2xl font-black text-gray-800 mb-1 group-hover:text-teal-700 transition-colors tracking-tight">{team.name}</h3>
                     )}
                     <p className="text-sm text-gray-500 font-medium h-10 overflow-hidden line-clamp-2">{team.description || 'No description provided.'}</p>
                   </div>
                   
-                  <div className="border-t border-gray-100/80 pt-4 mt-2">
+                  <div className="border-t border-white/40 pt-4 mt-2">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Members</p>
-                      <span className="bg-teal-50 text-teal-700 text-xs font-extrabold px-2 py-0.5 rounded-full border border-teal-100">{team.members.length}</span>
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-widest pl-1">Members</p>
+                      <span className="bg-teal-100/50 backdrop-blur text-teal-700 text-xs font-black px-2.5 py-1 rounded-full border border-teal-200 shadow-sm">{team.members.length}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {team.members.slice(0, 5).map(m => (
-                        <div key={m._id} className="flex items-center bg-gray-50 text-gray-700 text-[11px] font-bold px-2.5 py-1 rounded-md border border-gray-200/60 shadow-sm" title={m.name}>
-                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center text-[8px] mr-1.5">
+                        <div key={m._id} className="flex items-center bg-white/60 backdrop-blur text-gray-700 text-[11px] font-black px-3 py-1.5 rounded-xl border border-white/60 shadow-sm" title={m.name}>
+                          <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center text-[9px] mr-2">
                             {m.name.substring(0,1).toUpperCase()}
                           </div>
                           {m.name.split(' ')[0]}
                         </div>
                       ))}
                       {team.members.length > 5 && (
-                        <div className="flex items-center bg-gray-100 text-gray-600 text-[11px] font-bold px-2 py-1 rounded-md border border-gray-200/60 shadow-sm">
+                        <div className="flex items-center bg-white/60 backdrop-blur text-gray-600 text-[11px] font-black px-3 py-1.5 rounded-xl border border-white/60 shadow-sm">
                           +{team.members.length - 5}
                         </div>
                       )}
@@ -202,7 +236,8 @@ export default function Teams() {
                 </div>
               ))}
             </div>
-          )}
+          );
+          })()}
         </div>
       </div>
     </div>

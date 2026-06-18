@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
-import { Calendar, CalendarClock } from 'lucide-react';
+import { Calendar, CalendarClock, Download } from 'lucide-react';
+import { exportToCSV } from '../utils/exportUtils';
 
 export default function LeaveRequests() {
   const { user } = useAuthStore();
@@ -49,6 +50,17 @@ export default function LeaveRequests() {
     }
   };
 
+  const handleExport = () => {
+    const exportData = leaves.map(l => ({
+      Date: new Date(l.date).toLocaleDateString(),
+      User: l.user?.name || 'Unknown',
+      Email: l.user?.email || '',
+      Reason: l.reason,
+      Status: l.status
+    }));
+    exportToCSV(exportData, 'LeaveRequests_Export');
+  };
+
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col space-y-6 py-4">
       <div className="flex items-center justify-between mb-2 animate-fade-in-up">
@@ -56,6 +68,11 @@ export default function LeaveRequests() {
           <Calendar className="w-8 h-8 mr-3 text-teal-500" />
           {isAdmin ? 'Time Off Requests' : 'Time Off'}
         </h1>
+        {isAdmin && (
+          <button onClick={handleExport} className="bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center shadow-sm">
+            <Download className="w-4 h-4 mr-2" /> Export
+          </button>
+        )}
       </div>
 
       {!isAdmin && (
