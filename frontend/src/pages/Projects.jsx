@@ -208,6 +208,39 @@ export default function Projects() {
                 <h4 className="font-bold text-gray-700 text-sm pl-2">Events Details</h4>
                 <button onClick={addEvent} className="bg-gradient-to-r from-teal-400 to-teal-500 text-white hover:opacity-90 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm">+ Add Event</button>
             </div>
+            <datalist id="eventTypesList">
+              <option value="60th Wedding" />
+              <option value="Baby Shower" />
+              <option value="Birthday" />
+              <option value="Corporate Events" />
+              <option value="Ear Piercing Ceremony" />
+              <option value="Engagement" />
+              <option value="Get together" />
+              <option value="House Warming" />
+              <option value="Naming Ceremony" />
+              <option value="Outdoor Post-Wedding" />
+              <option value="Outdoor Pre-Wedding" />
+              <option value="Puberty" />
+              <option value="Reception" />
+              <option value="Religious Events" />
+              <option value="Rituals - Bride" />
+              <option value="Rituals - Groom" />
+              <option value="Wedding & Reception" />
+            </datalist>
+            <datalist id="servicesList">
+              <option value="Traditional Photography" />
+              <option value="Traditional Videography" />
+              <option value="Candid Photography" />
+              <option value="Candid Videography" />
+              <option value="Cinematography" />
+              <option value="Drone Shoot" />
+              <option value="Pre-Wedding Shoot" />
+              <option value="Post-Wedding Shoot" />
+              <option value="Live Streaming" />
+              <option value="LED Wall" />
+              <option value="Photo Booth" />
+              <option value="Album Printing" />
+            </datalist>
             <div className="space-y-4">
             {formData.events.map((ev, i) => (
                 <div key={i} className="grid grid-cols-2 md:grid-cols-5 gap-3 p-5 bg-white/50 backdrop-blur-md border border-white/60 rounded-2xl shadow-sm hover:shadow-md transition-all relative group">
@@ -226,11 +259,11 @@ export default function Projects() {
                    </div>
                    <div className="col-span-2 md:col-span-2">
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Event Type</label>
-                     <input type="text" placeholder="e.g. Wedding" value={ev.eventType} onChange={(e)=>handleEventChange(i, 'eventType', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
+                     <input list="eventTypesList" type="text" placeholder="Select or type..." value={ev.eventType} onChange={(e)=>handleEventChange(i, 'eventType', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
                    </div>
                    <div>
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Service</label>
-                     <input type="text" placeholder="Service" value={ev.service} onChange={(e)=>handleEventChange(i, 'service', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
+                     <input list="servicesList" type="text" placeholder="Select or type..." value={ev.service} onChange={(e)=>handleEventChange(i, 'service', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
                    </div>
                    <div>
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Location</label>
