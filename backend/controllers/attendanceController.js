@@ -7,8 +7,8 @@ export const getTodayAttendance = async (req, res) => {
     // Find the most recent record
     let attendance = await Attendance.findOne({ user: req.user._id }).sort({ date: -1 });
     
-    // Only return if it's from the last 24 hours
-    if (attendance && new Date() - attendance.date > 24 * 60 * 60 * 1000) {
+    // Only return if it's from today
+    if (attendance && new Date(attendance.date) < startOfDay) {
       attendance = null;
     }
 
@@ -21,7 +21,9 @@ export const getTodayAttendance = async (req, res) => {
 export const clockIn = async (req, res) => {
   try {
     let attendance = await Attendance.findOne({ user: req.user._id }).sort({ date: -1 });
-    const isToday = attendance && new Date() - attendance.date < 24 * 60 * 60 * 1000;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const isToday = attendance && new Date(attendance.date) >= startOfDay;
 
     if (isToday) {
       return res.status(400).json({ message: 'Already clocked in today' });
@@ -42,7 +44,9 @@ export const clockIn = async (req, res) => {
 export const clockOut = async (req, res) => {
   try {
     const attendance = await Attendance.findOne({ user: req.user._id }).sort({ date: -1 });
-    const isToday = attendance && new Date() - attendance.date < 24 * 60 * 60 * 1000;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const isToday = attendance && new Date(attendance.date) >= startOfDay;
 
     if (!isToday || !attendance) {
       return res.status(404).json({ message: 'No active attendance record found for today' });
@@ -79,7 +83,9 @@ export const startBreak = async (req, res) => {
   try {
     const { type } = req.body; 
     const attendance = await Attendance.findOne({ user: req.user._id }).sort({ date: -1 });
-    const isToday = attendance && new Date() - attendance.date < 24 * 60 * 60 * 1000;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const isToday = attendance && new Date(attendance.date) >= startOfDay;
 
     if (!isToday || !attendance || attendance.clockOut) {
       return res.status(400).json({ message: 'Not currently clocked in' });
@@ -103,7 +109,9 @@ export const startBreak = async (req, res) => {
 export const endBreak = async (req, res) => {
   try {
     const attendance = await Attendance.findOne({ user: req.user._id }).sort({ date: -1 });
-    const isToday = attendance && new Date() - attendance.date < 24 * 60 * 60 * 1000;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const isToday = attendance && new Date(attendance.date) >= startOfDay;
 
     if (!isToday || !attendance) {
       return res.status(404).json({ message: 'Attendance record not found' });
