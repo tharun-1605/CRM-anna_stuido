@@ -11,6 +11,7 @@ import AdminPanel from './pages/AdminPanel';
 import LeaveRequests from './pages/LeaveRequests';
 import ScreenshotViewer from './pages/ScreenshotViewer';
 import Projects from './pages/Projects';
+import Calendar from './pages/Calendar';
 import AssignWork from './pages/AssignWork';
 import WorkPackages from './pages/WorkPackages';
 import PageTransition from './components/PageTransition';
@@ -39,6 +40,7 @@ function AnimatedRoutes() {
           <Route path="screenshots" element={<ScreenshotViewer />} />
           <Route path="attendance" element={<Attendance />} />
           <Route path="projects" element={<Projects />} />
+          <Route path="calendar" element={<Calendar />} />
           <Route path="assign-work" element={<AssignWork />} />
           <Route path="work-packages" element={<WorkPackages />} />
           <Route path="work" element={<WorkPackages />} />

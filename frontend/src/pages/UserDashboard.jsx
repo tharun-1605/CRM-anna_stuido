@@ -3,6 +3,8 @@ import axios from '../api/axios';
 import { Calendar, FolderKanban, Play, Square } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useTimerStore from '../store/timerStore';
+import MasterCalendar from './Calendar';
+
 
 export default function UserDashboard() {
   const [projects, setProjects] = useState([]);
@@ -128,6 +130,10 @@ export default function UserDashboard() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="mt-8 bg-white/40 backdrop-blur-md rounded-3xl p-6 border border-white/50 shadow-sm">
+        <MasterCalendar />
       </div>
     </div>
   );

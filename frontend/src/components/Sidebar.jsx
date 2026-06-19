@@ -27,6 +27,7 @@ const getGradient = (to) => {
     case '/assign-work': return 'from-violet-500 to-purple-500 shadow-violet-500/20';
     case '/leave-request': return 'from-fuchsia-500 to-pink-500 shadow-fuchsia-500/20';
     case '/projects': return 'from-indigo-500 to-blue-500 shadow-indigo-500/20';
+    case '/calendar': return 'from-pink-500 to-rose-500 shadow-pink-500/20';
     case '/invoice': return 'from-green-500 to-emerald-500 shadow-green-500/20';
     case '/clients': return 'from-amber-500 to-orange-500 shadow-amber-500/20';
     case '/screenshots': return 'from-sky-500 to-cyan-500 shadow-sky-500/20';
@@ -138,6 +139,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         )}
         <NavItem to="/leave-request" icon={CalendarDays} text="Leave Request" isActive={isActive('/leave-request')} onClick={() => setMobileMenuOpen?.(false)} />
         <NavItem to="/projects" icon={KanbanSquare} text="Projects" isActive={isActive('/projects')} onClick={() => setMobileMenuOpen?.(false)} />
+        <NavItem to="/calendar" icon={CalendarDays} text="Calendar" badge="NEW" isActive={isActive('/calendar')} onClick={() => setMobileMenuOpen?.(false)} />
         {user?.role === 'Admin' && (
           <>
             <NavItem to="/invoice" icon={Receipt} text="Invoice" isActive={isActive('/invoice')} onClick={() => setMobileMenuOpen?.(false)} />
