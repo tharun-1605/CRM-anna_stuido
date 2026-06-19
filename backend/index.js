@@ -14,6 +14,7 @@ import payrollRoutes from './routes/payrollRoutes.js';
 import liveRoutes from './routes/liveRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import { initScheduler } from './utils/scheduler.js';
 
 dotenv.config();
 
@@ -26,6 +27,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Connect to MongoDB
 connectDB();
+
+// Initialize Scheduler
+initScheduler();
 
 // Routes
 app.use('/api/auth', authRoutes);

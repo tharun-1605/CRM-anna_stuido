@@ -25,7 +25,7 @@ const projectSchema = new mongoose.Schema({
   eventDuration: { type: String },
   notes: { type: String },
   priority: { type: String, enum: ['High', 'Medium', 'Low'], default: 'Medium' },
-  status: { type: String, enum: ['Pending', 'In Progress', 'Completed'], default: 'Pending' },
+  status: { type: String, enum: ['Upcoming Shoot', 'Raw Data Backup', 'Culling/Sorting', 'Editing/Retouching', 'Client Review', 'Final Delivery', 'Completed', 'Pending', 'In Progress'], default: 'Upcoming Shoot' },
   users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   events: [eventSchema]
 }, { timestamps: true });

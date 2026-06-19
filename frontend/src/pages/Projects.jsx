@@ -17,6 +17,7 @@ export default function Projects() {
   const [viewProject, setViewProject] = useState(null);
   const [statusFilter, setStatusFilter] = useState('Active');
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('Kanban');
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -314,6 +315,8 @@ export default function Projects() {
           return matchesStatus && matchesSearch;
         });
 
+        const kanbanStages = ['Upcoming Shoot', 'Raw Data Backup', 'Culling/Sorting', 'Editing/Retouching', 'Client Review', 'Final Delivery', 'Completed'];
+
         return (
           <div className="app-card flex-1 overflow-hidden flex flex-col animate-fade-in-up animate-stagger-1 relative">
             <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 z-10"></div>
@@ -323,12 +326,77 @@ export default function Projects() {
                 <button onClick={() => setStatusFilter('Active')} className={`px-4 py-1.5 text-sm rounded-lg font-bold transition-all ${statusFilter === 'Active' ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'}`}>Active</button>
                 <button onClick={() => setStatusFilter('Archived')} className={`px-4 py-1.5 text-sm rounded-lg font-bold transition-all ${statusFilter === 'Archived' ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'}`}>Archived</button>
               </div>
+              <div className="flex bg-white/40 backdrop-blur rounded-xl p-1.5 shadow-inner border border-white/50">
+                <button onClick={() => setViewMode('List')} className={`px-4 py-1.5 text-sm rounded-lg font-bold transition-all ${viewMode === 'List' ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'}`}>List</button>
+                <button onClick={() => setViewMode('Kanban')} className={`px-4 py-1.5 text-sm rounded-lg font-bold transition-all ${viewMode === 'Kanban' ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'}`}>Kanban</button>
+              </div>
               <div className="flex-1">
-                 <input type="text" placeholder="Search project by name & code..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="app-input w-full max-w-md px-4 py-2 text-sm" />
+                 <input type="text" placeholder="Search project by name & code..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="app-input w-full max-w-md px-4 py-2 text-sm ml-auto block" />
               </div>
             </div>
         
-        {/* Table Body */}
+        {/* Table/Kanban Body */}
+        {viewMode === 'Kanban' ? (
+          <div className="flex-1 overflow-x-auto overflow-y-hidden p-6 custom-scrollbar bg-transparent relative z-10 flex space-x-6 pb-8">
+            {kanbanStages.map(stage => {
+              const stageProjects = filteredProjects.filter(p => (p.status === stage) || (!p.status && stage === 'Upcoming Shoot') || (stage === 'Upcoming Shoot' && p.status === 'Pending') || (stage === 'Editing/Retouching' && p.status === 'In Progress'));
+              return (
+                <div key={stage} className="flex-shrink-0 w-[340px] flex flex-col bg-white/30 backdrop-blur-md rounded-2xl border border-white/50 shadow-sm h-full max-h-full">
+                  <div className="p-4 border-b border-white/40 flex justify-between items-center bg-white/40 rounded-t-2xl">
+                     <h3 className="font-extrabold text-gray-700 tracking-tight">{stage}</h3>
+                     <span className="bg-white/80 text-indigo-700 text-xs px-2.5 py-1 rounded-lg font-black shadow-sm">{stageProjects.length}</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                    {stageProjects.map(p => (
+                      <div key={p._id} className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group" onClick={() => setViewProject(p)}>
+                        <div className="flex justify-between items-start mb-3">
+                           <h4 className="font-black text-gray-800 text-[15px] group-hover:text-indigo-600 transition-colors leading-tight line-clamp-2" title={p.name}>{p.name}</h4>
+                           <div className="flex flex-col space-y-1 items-end shrink-0 ml-3">
+                             {p.priority === 'High' && <span className="bg-red-100 text-red-600 text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">High</span>}
+                             {p.priority === 'Medium' && <span className="bg-yellow-100 text-yellow-700 text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Med</span>}
+                             {p.priority === 'Low' && <span className="bg-green-100 text-green-700 text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Low</span>}
+                           </div>
+                        </div>
+                        <p className="text-xs font-bold text-gray-500 mb-4 bg-white/50 px-2.5 py-1.5 rounded-lg border border-white/60 inline-block truncate max-w-full">{p.client?.name || p.customer || 'No Client'}</p>
+                        
+                        <div className="flex justify-between items-center mb-4">
+                           <span className={`text-[10px] uppercase tracking-wider font-bold flex items-center ${p.endDate && new Date(p.endDate) < new Date() && p.status !== 'Completed' ? 'text-red-500 bg-red-50 px-2 py-1 rounded-md' : 'text-gray-400'}`}>
+                             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                             {p.endDate ? new Date(p.endDate).toLocaleDateString() : 'No Deadline'}
+                           </span>
+                        </div>
+                        
+                        <div onClick={(e) => e.stopPropagation()} className="pt-3 border-t border-gray-100">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Update Status</label>
+                          <select 
+                            value={['Pending', 'In Progress'].includes(p.status) ? (p.status === 'Pending' ? 'Upcoming Shoot' : 'Editing/Retouching') : (p.status || 'Upcoming Shoot')} 
+                            onChange={async (e) => {
+                              try {
+                                await axios.put(`/projects/${p._id}`, { status: e.target.value });
+                                toast.success('Status updated');
+                                fetchData();
+                              } catch(err) { toast.error('Failed to update status'); }
+                            }} 
+                            className="w-full bg-gray-50/50 hover:bg-white border border-gray-200 hover:border-indigo-300 text-xs font-bold text-gray-700 rounded-xl px-3 py-2 transition-all outline-none focus:ring-2 focus:ring-indigo-500/20"
+                          >
+                            <option value="Pending" className="hidden">Pending</option>
+                            <option value="In Progress" className="hidden">In Progress</option>
+                            {kanbanStages.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                    {stageProjects.length === 0 && (
+                      <div className="text-center py-10 border-2 border-dashed border-white/50 rounded-2xl bg-white/20">
+                         <p className="text-gray-400 text-xs font-extrabold uppercase tracking-widest">Empty</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
         <div className="flex-1 overflow-auto bg-transparent relative z-10">
            {filteredProjects.length === 0 ? (
              <div className="flex flex-col items-center justify-center h-full py-12">
@@ -371,7 +439,7 @@ export default function Projects() {
                         </p>
                      </div>
                      <div className="w-1/4 flex justify-end items-center space-x-4">
-                       <span className={`text-xs px-3 py-1.5 rounded-full font-bold border ${p.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : p.status === 'In Progress' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}>{p.status || 'Pending'}</span>
+                       <span className={`text-xs px-3 py-1.5 rounded-full font-bold border ${['Completed', 'Final Delivery'].includes(p.status) ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : ['In Progress', 'Editing/Retouching', 'Raw Data Backup'].includes(p.status) ? 'bg-blue-100 text-blue-700 border-blue-200' : ['Upcoming Shoot', 'Culling/Sorting', 'Client Review'].includes(p.status) ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}>{p.status || 'Upcoming Shoot'}</span>
                        <div className="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                          {isAdmin && (
                            <>
@@ -412,6 +480,7 @@ export default function Projects() {
              </div>
            )}
         </div>
+        )}
       </div>
       ); })()}
 
