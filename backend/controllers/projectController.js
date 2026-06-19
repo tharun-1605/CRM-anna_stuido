@@ -5,7 +5,7 @@ import WorkPackage from '../models/WorkPackage.js';
 export const getProjects = async (req, res) => {
   try {
     let filter = {};
-    if (req.user.role !== 'Admin') {
+    if (req.user.role !== 'Admin' && req.query.all !== 'true') {
       const userTasks = await Task.find({ assignees: req.user._id });
       const userWorkPackages = await WorkPackage.find({ user: req.user._id });
       

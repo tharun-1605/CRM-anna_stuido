@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
 import { ChevronLeft, ChevronRight, X, CalendarDays } from 'lucide-react';
+import useAuthStore from '../store/authStore';
 
 // Timezone-agnostic date parser to prevent day-shifts on calendar
 const parseDateAgnostic = (dateInput) => {
@@ -19,6 +20,8 @@ const parseDateAgnostic = (dateInput) => {
 };
 
 export default function MasterCalendar() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'Admin';
   const [currentDate, setCurrentDate] = useState(new Date());
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -28,7 +31,7 @@ export default function MasterCalendar() {
   const fetchData = async () => {
     try {
       const [projRes, userRes] = await Promise.all([
-        axios.get('/projects'),
+        axios.get('/projects?all=true'),
         axios.get('/auth/users')
       ]);
       setProjects(projRes.data);
@@ -50,6 +53,10 @@ export default function MasterCalendar() {
 
   // Update crew member / cameraMan
   const handleUpdateCameraMan = async (project, eventId, newCameraMan) => {
+    if (!isAdmin) {
+      toast.error('You do not have permission to update crew member');
+      return;
+    }
     try {
       let updatedEvents;
       if (eventId && eventId !== project._id) {
@@ -271,16 +278,20 @@ export default function MasterCalendar() {
                               <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Crew & Assignment</p>
                               <div className="flex items-center space-x-2 text-sm font-bold text-gray-700">
                                 <span>Crew Member:</span>
-                                <select
-                                  value={shoot.details?.cameraMan || ''}
-                                  onChange={(e) => handleUpdateCameraMan(shoot.project, isEvent ? shoot.details._id : null, e.target.value)}
-                                  className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-semibold text-gray-700 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                  <option value="">Unassigned</option>
-                                  {users.map(u => (
-                                    <option key={u._id} value={u.name}>{u.name}</option>
-                                  ))}
-                                </select>
+                                {isAdmin ? (
+                                  <select
+                                    value={shoot.details?.cameraMan || ''}
+                                    onChange={(e) => handleUpdateCameraMan(shoot.project, isEvent ? shoot.details._id : null, e.target.value)}
+                                    className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-semibold text-gray-700 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                                  >
+                                    <option value="">Unassigned</option>
+                                    {users.map(u => (
+                                      <option key={u._id} value={u.name}>{u.name}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <span className="font-semibold text-gray-600 bg-gray-100/80 px-2 py-1 rounded-md border border-gray-200">{shoot.details?.cameraMan || 'Unassigned'}</span>
+                                )}
                               </div>
                             </div>
                             <p className="text-sm font-bold text-gray-700 mt-2">Notes: <span className="font-medium text-gray-600">{shoot.details?.notes || '-'}</span></p>

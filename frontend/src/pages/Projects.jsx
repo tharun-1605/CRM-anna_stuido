@@ -366,24 +366,26 @@ export default function Projects() {
                            </span>
                         </div>
                         
-                        <div onClick={(e) => e.stopPropagation()} className="pt-3 border-t border-gray-100">
-                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Update Status</label>
-                          <select 
-                            value={['Pending', 'In Progress'].includes(p.status) ? (p.status === 'Pending' ? 'Upcoming Shoot' : 'Editing/Retouching') : (p.status || 'Upcoming Shoot')} 
-                            onChange={async (e) => {
-                              try {
-                                await axios.put(`/projects/${p._id}`, { status: e.target.value });
-                                toast.success('Status updated');
-                                fetchData();
-                              } catch(err) { toast.error('Failed to update status'); }
-                            }} 
-                            className="w-full bg-gray-50/50 hover:bg-white border border-gray-200 hover:border-indigo-300 text-xs font-bold text-gray-700 rounded-xl px-3 py-2 transition-all outline-none focus:ring-2 focus:ring-indigo-500/20"
-                          >
-                            <option value="Pending" className="hidden">Pending</option>
-                            <option value="In Progress" className="hidden">In Progress</option>
-                            {kanbanStages.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
-                        </div>
+                        {isAdmin && (
+                          <div onClick={(e) => e.stopPropagation()} className="pt-3 border-t border-gray-100">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Update Status</label>
+                            <select 
+                              value={['Pending', 'In Progress'].includes(p.status) ? (p.status === 'Pending' ? 'Upcoming Shoot' : 'Editing/Retouching') : (p.status || 'Upcoming Shoot')} 
+                              onChange={async (e) => {
+                                try {
+                                  await axios.put(`/projects/${p._id}`, { status: e.target.value });
+                                  toast.success('Status updated');
+                                  fetchData();
+                                } catch(err) { toast.error('Failed to update status'); }
+                              }} 
+                              className="w-full bg-gray-50/50 hover:bg-white border border-gray-200 hover:border-indigo-300 text-xs font-bold text-gray-700 rounded-xl px-3 py-2 transition-all outline-none focus:ring-2 focus:ring-indigo-500/20"
+                            >
+                              <option value="Pending" className="hidden">Pending</option>
+                              <option value="In Progress" className="hidden">In Progress</option>
+                              {kanbanStages.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                        )}
                       </div>
                     ))}
                     {stageProjects.length === 0 && (
