@@ -17,7 +17,7 @@ export default function Projects() {
   const [viewProject, setViewProject] = useState(null);
   const [statusFilter, setStatusFilter] = useState('Active');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('Kanban');
+  const [viewMode, setViewMode] = useState('List');
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({

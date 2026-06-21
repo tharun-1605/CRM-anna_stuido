@@ -39,23 +39,45 @@ const getGradient = (to) => {
   }
 };
 
-const NavItem = ({ to, icon: Icon, text, badge, isActive, onClick }) => (
-  <Link 
-    to={to} 
-    onClick={onClick}
-    className={`flex items-center px-3 py-2 mx-3 my-1 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] text-[13px] font-bold group ${isActive ? 'bg-white/60 shadow-sm backdrop-blur-xl border border-white/80 scale-[1.02]' : 'hover:bg-white/40 hover:shadow-sm border border-transparent hover:scale-[1.01]'}`}>
-    
-    <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center mr-3 transition-all duration-300 group-hover:scale-[1.15] group-hover:rotate-3 ${isActive ? `bg-gradient-to-br ${getGradient(to)} text-white shadow-lg` : `bg-white/80 text-gray-400 border border-gray-100 group-hover:text-gray-700 group-hover:border-white group-hover:shadow-md`}`}>
-      <Icon className="w-[16px] h-[16px]" strokeWidth={2.5} /> 
-    </div>
-    
-    <span className={`flex-1 ${isActive ? 'text-gray-800' : 'text-gray-500 group-hover:text-gray-800'}`}>{text}</span>
-    
-    {badge && (
-      <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full ml-2 bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm border border-teal-300/50">NEW</span>
-    )}
-  </Link>
-);
+const NavItem = ({ to, icon: Icon, text, badge, isActive, onClick }) => {
+  const isExternal = to.startsWith('http://') || to.startsWith('https://');
+
+  if (isExternal) {
+    return (
+      <a 
+        href={to} 
+        onClick={onClick}
+        className="flex items-center px-3 py-2 mx-3 my-1 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] text-[13px] font-bold group hover:bg-white/40 hover:shadow-sm border border-transparent hover:scale-[1.01]"
+      >
+        <div className="w-8 h-8 rounded-[10px] flex items-center justify-center mr-3 transition-all duration-300 group-hover:scale-[1.15] group-hover:rotate-3 bg-white/80 text-gray-400 border border-gray-100 group-hover:text-gray-700 group-hover:border-white group-hover:shadow-md">
+          <Icon className="w-[16px] h-[16px]" strokeWidth={2.5} /> 
+        </div>
+        <span className="flex-1 text-gray-500 group-hover:text-gray-800">{text}</span>
+        {badge && (
+          <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full ml-2 bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm border border-teal-300/50">NEW</span>
+        )}
+      </a>
+    );
+  }
+
+  return (
+    <Link 
+      to={to} 
+      onClick={onClick}
+      className={`flex items-center px-3 py-2 mx-3 my-1 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] text-[13px] font-bold group ${isActive ? 'bg-white/60 shadow-sm backdrop-blur-xl border border-white/80 scale-[1.02]' : 'hover:bg-white/40 hover:shadow-sm border border-transparent hover:scale-[1.01]'}`}>
+      
+      <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center mr-3 transition-all duration-300 group-hover:scale-[1.15] group-hover:rotate-3 ${isActive ? `bg-gradient-to-br ${getGradient(to)} text-white shadow-lg` : `bg-white/80 text-gray-400 border border-gray-100 group-hover:text-gray-700 group-hover:border-white group-hover:shadow-md`}`}>
+        <Icon className="w-[16px] h-[16px]" strokeWidth={2.5} /> 
+      </div>
+      
+      <span className={`flex-1 ${isActive ? 'text-gray-800' : 'text-gray-500 group-hover:text-gray-800'}`}>{text}</span>
+      
+      {badge && (
+        <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full ml-2 bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm border border-teal-300/50">NEW</span>
+      )}
+    </Link>
+  );
+};
 
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   const user = useAuthStore(state => state.user);
@@ -142,7 +164,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         <NavItem to="/calendar" icon={CalendarDays} text="Calendar" badge="NEW" isActive={isActive('/calendar')} onClick={() => setMobileMenuOpen?.(false)} />
         {user?.role === 'Admin' && (
           <>
-            <NavItem to="/invoice" icon={Receipt} text="Invoice" isActive={isActive('/invoice')} onClick={() => setMobileMenuOpen?.(false)} />
+            <NavItem to="https://invoiceapp-9187f.web.app/" icon={Receipt} text="Invoice" isActive={isActive('/invoice')} onClick={() => setMobileMenuOpen?.(false)} />
             <NavItem to="/clients" icon={Users} text="Clients" badge="NEW" isActive={isActive('/clients')} onClick={() => setMobileMenuOpen?.(false)} />
           </>
         )}

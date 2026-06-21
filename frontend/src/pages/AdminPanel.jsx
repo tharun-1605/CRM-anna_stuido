@@ -74,7 +74,7 @@ export default function AdminPanel() {
   const handleResetPassword = async () => {
     if (!resetUserId) return toast.error('Select a user');
     try {
-      await axios.put(`/auth/users/${resetUserId}/reset-password`);
+      await axios.put(`/auth/users/${resetUserId}/reset-password`, { password: 'password123' });
       toast.success('Password reset to default (password123)');
       setResetUserId('');
     } catch (error) {

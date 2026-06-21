@@ -10,7 +10,6 @@ export default function Teams() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '', members: [] });
   const [editingTeamId, setEditingTeamId] = useState(null);
-  const [editName, setEditName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchData = async () => {
@@ -45,16 +44,28 @@ export default function Teams() {
 
   const startEdit = (team) => {
     setEditingTeamId(team._id);
-    setEditName(team.name);
+    setFormData({
+      name: team.name,
+      description: team.description || '',
+      members: team.members.map(m => m._id)
+    });
+    setIsFormOpen(true);
+    // Smooth scroll to top form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleUpdate = async (id) => {
+    if (!formData.name) return toast.error('Team name is required');
     try {
-      await axios.put(`/teams/${id}`, { name: editName });
-      toast.success('Team updated');
+      await axios.put(`/teams/${id}`, formData);
+      toast.success('Team updated successfully');
       setEditingTeamId(null);
+      setIsFormOpen(false);
+      setFormData({ name: '', description: '', members: [] });
       fetchData();
-    } catch(err) { toast.error('Failed to update team'); }
+    } catch (err) {
+      toast.error('Failed to update team');
+    }
   };
 
   const handleDeleteTeam = async (id) => {
@@ -104,7 +115,21 @@ export default function Teams() {
           <button onClick={handleExport} className="bg-white/60 backdrop-blur border border-white/50 text-gray-700 hover:bg-white/80 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center shadow-sm">
             <Download className="w-4 h-4 mr-2" /> Export
           </button>
-          <button onClick={() => setIsFormOpen(!isFormOpen)} className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all rounded-xl">
+          <button 
+            onClick={() => {
+              if (isFormOpen && editingTeamId) {
+                setEditingTeamId(null);
+                setFormData({ name: '', description: '', members: [] });
+              } else {
+                setIsFormOpen(!isFormOpen);
+                if (!isFormOpen) {
+                  setEditingTeamId(null);
+                  setFormData({ name: '', description: '', members: [] });
+                }
+              }
+            }} 
+            className="app-btn-primary px-5 py-2.5 flex items-center text-sm font-bold shadow-lg hover:shadow-teal-500/25 transition-all rounded-xl"
+          >
             <Plus className="w-5 h-5 mr-2" /> Add Team
           </button>
         </div>
@@ -113,7 +138,9 @@ export default function Teams() {
       {isFormOpen && (
         <div className="app-card p-8 mb-6 animate-fade-in-up relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-          <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10 border-b border-gray-100/80 pb-4">Create New Team</h3>
+          <h3 className="font-bold text-gray-800 text-xl mb-6 relative z-10 border-b border-gray-100/80 pb-4">
+            {editingTeamId ? 'Edit Team' : 'Create New Team'}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
             <div className="space-y-6">
               <div>
@@ -124,7 +151,33 @@ export default function Teams() {
                 <label className="block text-sm font-semibold text-gray-600 mb-1.5">Description</label>
                 <textarea placeholder="What does this team do?" value={formData.description} onChange={(e)=>setFormData({...formData, description: e.target.value})} className="w-full app-input px-4 py-2.5 text-sm" rows="3" />
               </div>
-              <button onClick={handleCreate} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-lg hover:shadow-teal-500/30 px-6 py-2.5 text-sm w-full rounded-xl font-bold transition-all transform hover:-translate-y-0.5">Save Team</button>
+              {editingTeamId ? (
+                <div className="flex space-x-3">
+                  <button 
+                    onClick={() => handleUpdate(editingTeamId)} 
+                    className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-lg hover:shadow-teal-500/30 px-6 py-2.5 text-sm rounded-xl font-bold transition-all transform hover:-translate-y-0.5"
+                  >
+                    Update Team
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setIsFormOpen(false);
+                      setEditingTeamId(null);
+                      setFormData({ name: '', description: '', members: [] });
+                    }} 
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 text-sm rounded-xl font-bold transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={handleCreate} 
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-lg hover:shadow-teal-500/30 px-6 py-2.5 text-sm w-full rounded-xl font-bold transition-all transform hover:-translate-y-0.5"
+                >
+                  Save Team
+                </button>
+              )}
             </div>
             
             <div className="flex flex-col h-full">
@@ -186,29 +239,31 @@ export default function Teams() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
               {filteredTeams.map(team => (
-                <div key={team._id} className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all ease-[cubic-bezier(0.34,1.56,0.64,1)] duration-500 hover:-translate-y-1 relative group overflow-hidden">
+                <div key={team._id} className={`backdrop-blur-xl border rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all ease-[cubic-bezier(0.34,1.56,0.64,1)] duration-500 hover:-translate-y-1 relative group overflow-hidden ${
+                  editingTeamId === team._id 
+                    ? 'bg-teal-50/50 border-teal-400 ring-2 ring-teal-500/20 shadow-md translate-y-[-4px]' 
+                    : 'bg-white/40 border-white/60'
+                }`}>
                   <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-teal-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
                   <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {editingTeamId === team._id ? (
-                      <div className="flex space-x-2">
-                        <button onClick={() => handleUpdate(team._id)} className="bg-emerald-100/50 backdrop-blur border border-emerald-200 text-emerald-700 hover:bg-emerald-200/50 px-3 py-1 rounded-xl text-xs font-bold transition-colors">Save</button>
-                        <button onClick={() => setEditingTeamId(null)} className="bg-white/50 backdrop-blur border border-white/60 text-gray-700 hover:bg-white/80 px-3 py-1 rounded-xl text-xs font-bold transition-colors">Cancel</button>
-                      </div>
-                    ) : (
-                      <div className="flex space-x-2 bg-white/60 backdrop-blur rounded-xl shadow-sm border border-white/60 p-1">
-                        <button onClick={() => startEdit(team)} className="text-teal-600 hover:bg-white/80 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all">Edit</button>
-                        <button onClick={() => handleDeleteTeam(team._id)} className="text-red-500 hover:bg-white/80 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all">Delete</button>
-                      </div>
-                    )}
+                    <div className="flex space-x-2 bg-white/60 backdrop-blur rounded-xl shadow-sm border border-white/60 p-1">
+                      <button 
+                        onClick={() => startEdit(team)} 
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          editingTeamId === team._id 
+                            ? 'text-teal-700 bg-white shadow-sm' 
+                            : 'text-teal-600 hover:bg-white/80'
+                        }`}
+                      >
+                        Edit
+                      </button>
+                      <button onClick={() => handleDeleteTeam(team._id)} className="text-red-500 hover:bg-white/80 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all">Delete</button>
+                    </div>
                   </div>
 
                   <div className="mb-4 pt-2">
-                    {editingTeamId === team._id ? (
-                      <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="app-input px-3 py-1.5 text-sm w-3/4 mb-2 font-black" />
-                    ) : (
-                      <h3 className="text-2xl font-black text-gray-800 mb-1 group-hover:text-teal-700 transition-colors tracking-tight">{team.name}</h3>
-                    )}
+                    <h3 className="text-2xl font-black text-gray-800 mb-1 group-hover:text-teal-700 transition-colors tracking-tight">{team.name}</h3>
                     <p className="text-sm text-gray-500 font-medium h-10 overflow-hidden line-clamp-2">{team.description || 'No description provided.'}</p>
                   </div>
                   
