@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
 
+const subServiceSchema = new mongoose.Schema({
+  service: { type: String },
+  cameraMan: { type: String },
+  hdd: { type: String },
+  copiedBy: { type: String }
+});
+
 const eventSchema = new mongoose.Schema({
   date: { type: Date },
   startTime: { type: String },
@@ -10,7 +17,8 @@ const eventSchema = new mongoose.Schema({
   cameraMan: { type: String },
   hdd: { type: String },
   copiedBy: { type: String },
-  notes: { type: String }
+  notes: { type: String },
+  subServices: [subServiceSchema]
 });
 
 const projectSchema = new mongoose.Schema({

@@ -63,7 +63,13 @@ export default function MasterCalendar() {
         // Update existing event
         updatedEvents = project.events.map(ev => {
           if (ev._id === eventId) {
-            return { ...ev, cameraMan: newCameraMan };
+            const newSubServices = [...(ev.subServices || [])];
+            if (newSubServices.length > 0) {
+              newSubServices[0] = { ...newSubServices[0], cameraMan: newCameraMan };
+            } else {
+              newSubServices.push({ service: ev.service || 'Shoot', cameraMan: newCameraMan, hdd: ev.hdd || '', copiedBy: ev.copiedBy || '' });
+            }
+            return { ...ev, cameraMan: newCameraMan, subServices: newSubServices };
           }
           return ev;
         });
@@ -73,7 +79,8 @@ export default function MasterCalendar() {
           date: project.startDate || new Date(),
           eventType: 'Shoot',
           cameraMan: newCameraMan,
-          location: project.location || ''
+          location: project.location || '',
+          subServices: [{ service: 'Shoot', cameraMan: newCameraMan, hdd: '', copiedBy: '' }]
         };
         updatedEvents = [...(project.events || []), newEvent];
       }
@@ -83,6 +90,53 @@ export default function MasterCalendar() {
       });
 
       // Update state
+      setProjects(prevProjects =>
+        prevProjects.map(p => p._id === project._id ? res.data : p)
+      );
+
+      toast.success('Crew member updated');
+    } catch (err) {
+      toast.error('Failed to update crew member');
+    }
+  };
+
+  const handleUpdateSubServiceCameraMan = async (project, eventId, subServiceIndex, newCameraMan) => {
+    if (!isAdmin) {
+      toast.error('You do not have permission to update crew member');
+      return;
+    }
+    try {
+      let updatedEvents;
+      if (eventId && eventId !== project._id) {
+        updatedEvents = project.events.map(ev => {
+          if (ev._id === eventId) {
+            const newSubServices = [...(ev.subServices || [])];
+            if (newSubServices[subServiceIndex]) {
+              newSubServices[subServiceIndex] = {
+                ...newSubServices[subServiceIndex],
+                cameraMan: newCameraMan
+              };
+            }
+            const firstCameraMan = newSubServices[0]?.cameraMan || '';
+            return { ...ev, subServices: newSubServices, cameraMan: firstCameraMan };
+          }
+          return ev;
+        });
+      } else {
+        const newEvent = {
+          date: project.startDate || new Date(),
+          eventType: 'Shoot',
+          location: project.location || '',
+          subServices: [{ service: 'Shoot', cameraMan: newCameraMan, hdd: '', copiedBy: '' }],
+          cameraMan: newCameraMan
+        };
+        updatedEvents = [...(project.events || []), newEvent];
+      }
+
+      const res = await axios.put(`/projects/${project._id}`, {
+        events: updatedEvents
+      });
+
       setProjects(prevProjects =>
         prevProjects.map(p => p._id === project._id ? res.data : p)
       );
@@ -276,23 +330,54 @@ export default function MasterCalendar() {
                           <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex flex-col justify-between">
                             <div>
                               <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Crew & Assignment</p>
-                              <div className="flex items-center space-x-2 text-sm font-bold text-gray-700">
-                                <span>Crew Member:</span>
-                                {isAdmin ? (
-                                  <select
-                                    value={shoot.details?.cameraMan || ''}
-                                    onChange={(e) => handleUpdateCameraMan(shoot.project, isEvent ? shoot.details._id : null, e.target.value)}
-                                    className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-semibold text-gray-700 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                                  >
-                                    <option value="">Unassigned</option>
-                                    {users.map(u => (
-                                      <option key={u._id} value={u.name}>{u.name}</option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <span className="font-semibold text-gray-600 bg-gray-100/80 px-2 py-1 rounded-md border border-gray-200">{shoot.details?.cameraMan || 'Unassigned'}</span>
-                                )}
-                              </div>
+                              
+                              {shoot.details?.subServices && shoot.details.subServices.length > 0 ? (
+                                <div className="space-y-2 mt-1">
+                                  {shoot.details.subServices.map((ss, idx) => (
+                                    <div key={idx} className="flex flex-col space-y-0.5 border-b border-gray-100 last:border-0 pb-1.5 last:pb-0">
+                                      <div className="flex justify-between items-center text-[11px] font-bold text-indigo-600">
+                                        <span>{ss.service || 'Service'}</span>
+                                        <span className="text-[9px] text-gray-400">HDD: {ss.hdd || '-'} | Copy: {ss.copiedBy || '-'}</span>
+                                      </div>
+                                      <div className="flex items-center space-x-2 text-xs text-gray-700">
+                                        <span className="font-semibold text-gray-500">Camera Man:</span>
+                                        {isAdmin ? (
+                                          <select
+                                            value={ss.cameraMan || ''}
+                                            onChange={(e) => handleUpdateSubServiceCameraMan(shoot.project, isEvent ? shoot.details._id : null, idx, e.target.value)}
+                                            className="bg-white border border-gray-200 rounded px-1.5 py-0.5 text-[11px] font-semibold text-gray-700 outline-none focus:ring-1 focus:ring-indigo-500"
+                                          >
+                                            <option value="">Unassigned</option>
+                                            {users.map(u => (
+                                              <option key={u._id} value={u.name}>{u.name}</option>
+                                            ))}
+                                          </select>
+                                        ) : (
+                                          <span className="font-semibold text-gray-600 bg-gray-100/50 px-1 py-0.5 rounded border border-gray-200">{ss.cameraMan || 'Unassigned'}</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="flex items-center space-x-2 text-sm font-bold text-gray-700">
+                                  <span>Crew Member:</span>
+                                  {isAdmin ? (
+                                    <select
+                                      value={shoot.details?.cameraMan || ''}
+                                      onChange={(e) => handleUpdateCameraMan(shoot.project, isEvent ? shoot.details._id : null, e.target.value)}
+                                      className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-semibold text-gray-700 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                                    >
+                                      <option value="">Unassigned</option>
+                                      {users.map(u => (
+                                        <option key={u._id} value={u.name}>{u.name}</option>
+                                      ))}
+                                    </select>
+                                  ) : (
+                                    <span className="font-semibold text-gray-600 bg-gray-100/80 px-2 py-1 rounded-md border border-gray-200">{shoot.details?.cameraMan || 'Unassigned'}</span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                             <p className="text-sm font-bold text-gray-700 mt-2">Notes: <span className="font-medium text-gray-600">{shoot.details?.notes || '-'}</span></p>
                           </div>

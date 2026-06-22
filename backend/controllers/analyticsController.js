@@ -70,10 +70,11 @@ export const getAdminDashboardStats = async (req, res) => {
     }).distinct('user');
     const clockedInCount = todayLogs.length;
 
+    const nextDay = new Date(today);
+    nextDay.setDate(today.getDate() + 1);
     const todayLeaves = await LeaveRequest.find({
-      status: 'Approved',
-      startDate: { $lte: today },
-      endDate: { $gte: today }
+      status: 'APPROVED',
+      date: { $gte: today, $lt: nextDay }
     });
     const onTimeOffCount = todayLeaves.length;
 

@@ -27,7 +27,15 @@ export default function Projects() {
   const addEvent = () => {
     setFormData({
       ...formData,
-      events: [...formData.events, { date: '', startTime: '', endTime: '', eventType: '', service: '', location: '', cameraMan: '', hdd: '', copiedBy: '', notes: '' }]
+      events: [...formData.events, {
+        date: '',
+        startTime: '',
+        endTime: '',
+        eventType: '',
+        location: '',
+        notes: '',
+        subServices: [{ service: '', cameraMan: '', hdd: '', copiedBy: '' }]
+      }]
     });
   };
 
@@ -39,6 +47,35 @@ export default function Projects() {
 
   const removeEvent = (index) => {
     const newEvents = formData.events.filter((_, i) => i !== index);
+    setFormData({ ...formData, events: newEvents });
+  };
+
+  const addSubService = (eventIndex) => {
+    const newEvents = [...formData.events];
+    const event = { ...newEvents[eventIndex] };
+    event.subServices = [...(event.subServices || []), { service: '', cameraMan: '', hdd: '', copiedBy: '' }];
+    newEvents[eventIndex] = event;
+    setFormData({ ...formData, events: newEvents });
+  };
+
+  const removeSubService = (eventIndex, serviceIndex) => {
+    const newEvents = [...formData.events];
+    const event = { ...newEvents[eventIndex] };
+    event.subServices = (event.subServices || []).filter((_, idx) => idx !== serviceIndex);
+    if (event.subServices.length === 0) {
+      event.subServices = [{ service: '', cameraMan: '', hdd: '', copiedBy: '' }];
+    }
+    newEvents[eventIndex] = event;
+    setFormData({ ...formData, events: newEvents });
+  };
+
+  const handleSubServiceChange = (eventIndex, serviceIndex, field, value) => {
+    const newEvents = [...formData.events];
+    const event = { ...newEvents[eventIndex] };
+    const newSubServices = [...(event.subServices || [])];
+    newSubServices[serviceIndex] = { ...newSubServices[serviceIndex], [field]: value };
+    event.subServices = newSubServices;
+    newEvents[eventIndex] = event;
     setFormData({ ...formData, events: newEvents });
   };
 
@@ -86,7 +123,18 @@ export default function Projects() {
       startDate: p.startDate ? p.startDate.split('T')[0] : '',
       endDate: p.endDate ? p.endDate.split('T')[0] : '',
       priority: p.priority || 'Medium',
-      events: p.events || []
+      events: (p.events || []).map(ev => ({
+        ...ev,
+        date: ev.date ? ev.date.split('T')[0] : '',
+        subServices: ev.subServices && ev.subServices.length > 0 
+          ? ev.subServices.map(ss => ({
+              service: ss.service || '',
+              cameraMan: ss.cameraMan || '',
+              hdd: ss.hdd || '',
+              copiedBy: ss.copiedBy || ''
+            }))
+          : [{ service: ev.service || '', cameraMan: ev.cameraMan || '', hdd: ev.hdd || '', copiedBy: ev.copiedBy || '' }]
+      }))
     });
     setIsFormOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -94,12 +142,31 @@ export default function Projects() {
 
   const handleSave = async () => {
     if (!formData.name) return toast.error('Project Name is required');
+    
+    // Ensure all subServices and legacy fields are populated
+    const processedEvents = formData.events.map(ev => {
+      const subServices = ev.subServices && ev.subServices.length > 0 
+        ? ev.subServices 
+        : [{ service: ev.service || '', cameraMan: ev.cameraMan || '', hdd: ev.hdd || '', copiedBy: ev.copiedBy || '' }];
+      const firstSub = subServices[0];
+      return {
+        ...ev,
+        service: firstSub.service || '',
+        cameraMan: firstSub.cameraMan || '',
+        hdd: firstSub.hdd || '',
+        copiedBy: firstSub.copiedBy || '',
+        subServices
+      };
+    });
+
+    const payload = { ...formData, events: processedEvents };
+
     try {
       if (editingId) {
-        await axios.put(`/projects/${editingId}`, formData);
+        await axios.put(`/projects/${editingId}`, payload);
         toast.success('Project updated successfully');
       } else {
-        await axios.post('/projects', formData);
+        await axios.post('/projects', payload);
         toast.success('Project created successfully');
       }
       fetchData();
@@ -262,35 +329,85 @@ export default function Projects() {
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Event Type</label>
                      <input list="eventTypesList" type="text" placeholder="Select or type..." value={ev.eventType} onChange={(e)=>handleEventChange(i, 'eventType', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
                    </div>
-                   <div>
-                     <label className="block text-xs font-semibold text-gray-500 mb-1">Service</label>
-                     <input list="servicesList" type="text" placeholder="Select or type..." value={ev.service} onChange={(e)=>handleEventChange(i, 'service', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
-                   </div>
-                   <div>
+                   <div className="col-span-2 md:col-span-2">
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Location</label>
                      <input type="text" placeholder="Location" value={ev.location} onChange={(e)=>handleEventChange(i, 'location', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
                    </div>
-                   <div>
-                     <label className="block text-xs font-semibold text-gray-500 mb-1">Camera Man</label>
-                     <select value={ev.cameraMan} onChange={(e)=>handleEventChange(i, 'cameraMan', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs">
-                        <option value="">Select Member</option>
-                        {users.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
-                     </select>
-                   </div>
-                   <div>
-                     <label className="block text-xs font-semibold text-gray-500 mb-1">HDD</label>
-                     <input type="text" placeholder="HDD" value={ev.hdd} onChange={(e)=>handleEventChange(i, 'hdd', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-semibold text-gray-500 mb-1">Copied By</label>
-                     <select value={ev.copiedBy} onChange={(e)=>handleEventChange(i, 'copiedBy', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs">
-                        <option value="">Select Member</option>
-                        {users.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
-                     </select>
-                   </div>
-                   <div className="col-span-2 md:col-span-5">
+                   <div className="col-span-2 md:col-span-3">
                      <label className="block text-xs font-semibold text-gray-500 mb-1">Notes</label>
                      <input type="text" placeholder="Notes" value={ev.notes} onChange={(e)=>handleEventChange(i, 'notes', e.target.value)} className="app-input w-full px-2 py-1.5 text-xs" />
+                   </div>
+
+                   {/* Sub-services / Service Assignments list */}
+                   <div className="col-span-2 md:col-span-5 border-t border-gray-200/40 pt-4 mt-2">
+                     <div className="flex items-center justify-between mb-3">
+                       <label className="block text-xs font-bold text-teal-600 uppercase tracking-wider">Services & Crew Assignments</label>
+                       <button 
+                         type="button" 
+                         onClick={() => addSubService(i)} 
+                         className="bg-teal-50 hover:bg-teal-100 text-teal-600 px-3 py-1 rounded-lg text-[10px] font-black transition-all flex items-center shadow-sm"
+                       >
+                         <Plus className="w-3 h-3 mr-1" /> Add Service Row
+                       </button>
+                     </div>
+                     <div className="space-y-3">
+                       {(ev.subServices || [{ service: '', cameraMan: '', hdd: '', copiedBy: '' }]).map((ss, sIdx) => (
+                         <div key={sIdx} className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white/40 p-3 rounded-xl border border-white/80 relative group/subservice">
+                           {(ev.subServices || []).length > 1 && (
+                             <button 
+                               type="button" 
+                               onClick={() => removeSubService(i, sIdx)} 
+                               className="absolute -top-1.5 -right-1.5 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white w-5 h-5 rounded-full flex items-center justify-center transition-all shadow-sm text-xs font-black"
+                             >
+                               &times;
+                             </button>
+                           )}
+                           <div>
+                             <label className="block text-[10px] font-bold text-gray-500 mb-1">Service</label>
+                             <input 
+                               list="servicesList" 
+                               type="text" 
+                               placeholder="Select or type..." 
+                               value={ss.service || ''} 
+                               onChange={(e) => handleSubServiceChange(i, sIdx, 'service', e.target.value)} 
+                               className="app-input w-full px-2 py-1 text-xs bg-white/80" 
+                             />
+                           </div>
+                           <div>
+                             <label className="block text-[10px] font-bold text-gray-500 mb-1">Camera Man</label>
+                             <select 
+                               value={ss.cameraMan || ''} 
+                               onChange={(e) => handleSubServiceChange(i, sIdx, 'cameraMan', e.target.value)} 
+                               className="app-input w-full px-2 py-1 text-xs bg-white/80"
+                             >
+                               <option value="">Select Member</option>
+                               {users.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
+                             </select>
+                           </div>
+                           <div>
+                             <label className="block text-[10px] font-bold text-gray-500 mb-1">HDD</label>
+                             <input 
+                               type="text" 
+                               placeholder="HDD" 
+                               value={ss.hdd || ''} 
+                               onChange={(e) => handleSubServiceChange(i, sIdx, 'hdd', e.target.value)} 
+                               className="app-input w-full px-2 py-1 text-xs bg-white/80" 
+                             />
+                           </div>
+                           <div>
+                             <label className="block text-[10px] font-bold text-gray-500 mb-1">Copied By</label>
+                             <select 
+                               value={ss.copiedBy || ''} 
+                               onChange={(e) => handleSubServiceChange(i, sIdx, 'copiedBy', e.target.value)} 
+                               className="app-input w-full px-2 py-1 text-xs bg-white/80"
+                             >
+                               <option value="">Select Member</option>
+                               {users.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
+                             </select>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
                    </div>
                 </div>
             ))}
@@ -521,20 +638,60 @@ export default function Projects() {
                        </tr>
                      </thead>
                      <tbody className="divide-y divide-gray-50 bg-white">
-                       {viewProject.events.map((ev, i) => (
-                         <tr key={i} className="hover:bg-teal-50/50 transition-colors">
-                           <td className="py-3 px-4 whitespace-nowrap font-bold text-gray-800">{ev.date ? new Date(ev.date).toLocaleDateString() : '-'}</td>
-                           <td className="py-3 px-4 whitespace-nowrap text-gray-600 font-medium">{ev.startTime || '-'}</td>
-                           <td className="py-3 px-4 whitespace-nowrap text-gray-600 font-medium">{ev.endTime || '-'}</td>
-                           <td className="py-3 px-4 text-gray-600 font-medium"><span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md text-xs font-bold">{ev.eventType || '-'}</span></td>
-                           <td className="py-3 px-4 text-gray-600 font-medium">{ev.service || '-'}</td>
-                           <td className="py-3 px-4 text-gray-600 font-medium">{ev.location || '-'}</td>
-                           <td className="py-3 px-4 text-gray-600 font-medium">{ev.cameraMan || '-'}</td>
-                           <td className="py-3 px-4 text-gray-600 font-medium">{ev.hdd || '-'}</td>
-                           <td className="py-3 px-4 text-gray-600 font-medium">{ev.copiedBy || '-'}</td>
-                           <td className="py-3 px-4 text-gray-600 font-medium">{ev.notes || '-'}</td>
-                         </tr>
-                       ))}
+                        {viewProject.events.map((ev, i) => (
+                          <tr key={i} className="hover:bg-teal-50/50 transition-colors">
+                            <td className="py-3 px-4 whitespace-nowrap font-bold text-gray-800">{ev.date ? new Date(ev.date).toLocaleDateString() : '-'}</td>
+                            <td className="py-3 px-4 whitespace-nowrap text-gray-600 font-medium">{ev.startTime || '-'}</td>
+                            <td className="py-3 px-4 whitespace-nowrap text-gray-600 font-medium">{ev.endTime || '-'}</td>
+                            <td className="py-3 px-4 text-gray-600 font-medium"><span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md text-xs font-bold">{ev.eventType || '-'}</span></td>
+                            <td className="py-3 px-4 text-gray-600 font-medium">
+                              {ev.subServices && ev.subServices.length > 0 ? (
+                                <div className="space-y-1">
+                                  {ev.subServices.map((ss, idx) => (
+                                    <div key={idx} className="border-b border-gray-100 last:border-0 pb-0.5 last:pb-0">{ss.service || '-'}</div>
+                                  ))}
+                                </div>
+                              ) : (
+                                ev.service || '-'
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-gray-600 font-medium">{ev.location || '-'}</td>
+                            <td className="py-3 px-4 text-gray-600 font-medium">
+                              {ev.subServices && ev.subServices.length > 0 ? (
+                                <div className="space-y-1">
+                                  {ev.subServices.map((ss, idx) => (
+                                    <div key={idx} className="border-b border-gray-100 last:border-0 pb-0.5 last:pb-0">{ss.cameraMan || '-'}</div>
+                                  ))}
+                                </div>
+                              ) : (
+                                ev.cameraMan || '-'
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-gray-600 font-medium">
+                              {ev.subServices && ev.subServices.length > 0 ? (
+                                <div className="space-y-1">
+                                  {ev.subServices.map((ss, idx) => (
+                                    <div key={idx} className="border-b border-gray-100 last:border-0 pb-0.5 last:pb-0">{ss.hdd || '-'}</div>
+                                  ))}
+                                </div>
+                              ) : (
+                                ev.hdd || '-'
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-gray-600 font-medium">
+                              {ev.subServices && ev.subServices.length > 0 ? (
+                                <div className="space-y-1">
+                                  {ev.subServices.map((ss, idx) => (
+                                    <div key={idx} className="border-b border-gray-100 last:border-0 pb-0.5 last:pb-0">{ss.copiedBy || '-'}</div>
+                                  ))}
+                                </div>
+                              ) : (
+                                ev.copiedBy || '-'
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-gray-600 font-medium">{ev.notes || '-'}</td>
+                          </tr>
+                        ))}
                      </tbody>
                    </table>
                  </div>

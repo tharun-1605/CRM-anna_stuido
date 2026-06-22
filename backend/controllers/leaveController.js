@@ -2,11 +2,12 @@ import LeaveRequest from '../models/LeaveRequest.js';
 
 export const createLeaveRequest = async (req, res) => {
   try {
-    const { date, reason } = req.body;
+    const { date, reason, type } = req.body;
     const leave = await LeaveRequest.create({
       user: req.user._id,
       date,
-      reason
+      reason,
+      type: type || 'Casual Leave'
     });
     res.status(201).json(leave);
   } catch (error) {
