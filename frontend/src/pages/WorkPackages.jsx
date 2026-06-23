@@ -55,7 +55,7 @@ export default function WorkPackages() {
     const exportData = filteredAssignments.map(a => ({
       Task: a.name,
       Project: a.project?.name || '-',
-      User: a.user?.name || 'Unknown',
+      User: a.user?.name || a.team?.name || 'Unknown',
       EstimatedHours: (a.estimatedHours || 0).toFixed(1),
       TimeSpent: (a.timeSpent || 0).toFixed(2),
       Status: a.status
@@ -122,9 +122,9 @@ export default function WorkPackages() {
                           <td className="px-6 py-4 text-gray-600 font-medium">
                             <div className="flex items-center">
                               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-extrabold text-[10px] mr-2">
-                                {a.user?.name ? a.user.name.substring(0,2).toUpperCase() : '?'}
+                                {a.user?.name ? a.user.name.substring(0,2).toUpperCase() : (a.team?.name ? a.team.name.substring(0,2).toUpperCase() : '?')}
                               </div>
-                              <span className="font-bold text-gray-700">{a.user?.name || 'Unknown'}</span>
+                              <span className="font-bold text-gray-700">{a.user?.name || a.team?.name || 'Unknown'}</span>
                             </div>
                           </td>
                         )}

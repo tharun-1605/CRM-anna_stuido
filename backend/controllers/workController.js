@@ -13,19 +13,15 @@ export const assignWork = async (req, res) => {
       const teamDoc = await Team.findById(team);
       if (!teamDoc) return res.status(404).json({ message: 'Team not found' });
       
-      const workPackages = await Promise.all(
-        teamDoc.members.map(memberId => 
-          WorkPackage.create({
-            user: memberId,
-            project,
-            name,
-            estimatedHours,
-            priority,
-            dueDate
-          })
-        )
-      );
-      return res.status(201).json({ message: 'Tasks assigned to team members', count: workPackages.length });
+      const workPackage = await WorkPackage.create({
+        team,
+        project,
+        name,
+        estimatedHours,
+        priority,
+        dueDate
+      });
+      return res.status(201).json(workPackage);
     } else if (user) {
       const workPackage = await WorkPackage.create({
         user,
@@ -50,6 +46,7 @@ export const getAllWork = async (req, res) => {
   try {
     const workPackages = await WorkPackage.find({})
       .populate('user', 'name')
+      .populate('team', 'name')
       .populate('project', 'name');
     
     // We also need to get the time logs for each work package
@@ -69,7 +66,16 @@ export const getAllWork = async (req, res) => {
 // @route   GET /api/work/me
 export const getMyWork = async (req, res) => {
   try {
-    const workPackages = await WorkPackage.find({ user: req.user._id })
+    const userTeams = await Team.find({ members: req.user._id });
+    const teamIds = userTeams.map(t => t._id);
+    
+    const workPackages = await WorkPackage.find({
+      $or: [
+        { user: req.user._id },
+        { team: { $in: teamIds } }
+      ]
+    })
+      .populate('team', 'name')
       .populate('project', 'name');
     
     const packagesWithLogs = await Promise.all(workPackages.map(async (wp) => {

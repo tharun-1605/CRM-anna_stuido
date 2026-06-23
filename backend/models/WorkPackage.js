@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 
 const workPackageSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' },
   project: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
   name: { type: String, required: true },
   estimatedHours: { type: Number, required: true },

@@ -128,7 +128,7 @@ export default function AssignWork() {
     const exportData = filteredAssignments.map(a => ({
       TaskName: a.name,
       Project: a.project?.name || '-',
-      Assignee: a.user?.name || 'Unassigned',
+      Assignee: a.user?.name || a.team?.name || 'Unassigned',
       EstimatedHours: a.estimatedHours || 0,
       Priority: a.priority || 'Medium',
       DueDate: a.dueDate ? new Date(a.dueDate).toLocaleDateString() : '-',
@@ -296,9 +296,9 @@ export default function AssignWork() {
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-black text-xs mr-3 shadow-sm group-hover:scale-110 transition-transform">
-                              {a.user?.name ? a.user.name.substring(0,2).toUpperCase() : '?'}
+                              {a.user?.name ? a.user.name.substring(0,2).toUpperCase() : (a.team?.name ? a.team.name.substring(0,2).toUpperCase() : '?')}
                             </div>
-                            <span className="font-bold text-gray-800">{a.user?.name || 'Unassigned'}</span>
+                            <span className="font-bold text-gray-800">{a.user?.name || a.team?.name || 'Unassigned'}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
