@@ -47,7 +47,7 @@ export default function Teams() {
     setFormData({
       name: team.name,
       description: team.description || '',
-      members: team.members.map(m => m._id)
+      members: (team.members || []).filter(m => m).map(m => m._id)
     });
     setIsFormOpen(true);
     // Smooth scroll to top form
@@ -91,15 +91,15 @@ export default function Teams() {
       const term = searchTerm.toLowerCase();
       if (!term) return true;
       const matchesName = t.name?.toLowerCase().includes(term);
-      const matchesMember = t.members?.some(m => m.name?.toLowerCase().includes(term));
+      const matchesMember = t.members?.some(m => m?.name?.toLowerCase().includes(term));
       return matchesName || matchesMember;
     });
 
     const exportData = filteredTeams.map(t => ({
       TeamName: t.name,
       Description: t.description || '',
-      MembersCount: t.members?.length || 0,
-      Members: t.members?.map(m => m.name).join(' | ') || ''
+      MembersCount: t.members?.filter(m => m).length || 0,
+      Members: t.members?.filter(m => m).map(m => m.name).join(' | ') || ''
     }));
     exportToCSV(exportData, 'Teams_Export');
   };
@@ -180,9 +180,9 @@ export default function Teams() {
               )}
             </div>
             
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-[300px]">
               <label className="block text-sm font-semibold text-gray-600 mb-1.5">Select Members</label>
-              <div className="flex-1 overflow-y-auto border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-2 shadow-inner">
+              <div className="flex-1 overflow-y-auto border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-2 shadow-inner custom-scrollbar">
                 {users.map(u => (
                   <label key={u._id} className="flex items-center space-x-3 text-sm text-gray-700 cursor-pointer bg-white/60 backdrop-blur p-3 rounded-xl border border-white/60 hover:border-teal-400 hover:shadow-md transition-all">
                     <input 
@@ -273,17 +273,17 @@ export default function Teams() {
                       <span className="bg-teal-100/50 backdrop-blur text-teal-700 text-xs font-black px-2.5 py-1 rounded-full border border-teal-200 shadow-sm">{team.members.length}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {team.members.slice(0, 5).map(m => (
+                      {(team.members || []).filter(m => m).slice(0, 5).map(m => (
                         <div key={m._id} className="flex items-center bg-white/60 backdrop-blur text-gray-700 text-[11px] font-black px-3 py-1.5 rounded-xl border border-white/60 shadow-sm" title={m.name}>
                           <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center text-[9px] mr-2">
-                            {m.name.substring(0,1).toUpperCase()}
+                            {m.name ? m.name.substring(0,1).toUpperCase() : ''}
                           </div>
-                          {m.name.split(' ')[0]}
+                          {m.name ? m.name.split(' ')[0] : ''}
                         </div>
                       ))}
-                      {team.members.length > 5 && (
+                      {(team.members || []).filter(m => m).length > 5 && (
                         <div className="flex items-center bg-white/60 backdrop-blur text-gray-600 text-[11px] font-black px-3 py-1.5 rounded-xl border border-white/60 shadow-sm">
-                          +{team.members.length - 5}
+                          +{(team.members || []).filter(m => m).length - 5}
                         </div>
                       )}
                     </div>

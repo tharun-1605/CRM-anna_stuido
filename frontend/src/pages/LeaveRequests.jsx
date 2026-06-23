@@ -96,10 +96,10 @@ export default function LeaveRequests() {
 
   // Filter approved leaves for selected user and selected year
   const userLeaves = leaves.filter(l => {
-    const leaveUser = l.user?._id || l.user;
-    const userIdMatch = typeof leaveUser === 'object' 
-      ? leaveUser._id === activeUserId 
-      : leaveUser === activeUserId;
+    const leaveUser = l.user;
+    if (!leaveUser) return false;
+    const leaveUserId = typeof leaveUser === 'object' ? leaveUser._id : leaveUser;
+    const userIdMatch = leaveUserId === activeUserId;
     const yearMatch = new Date(l.date).getFullYear() === Number(selectedYear);
     return userIdMatch && yearMatch && l.status === 'APPROVED';
   });
@@ -113,8 +113,10 @@ export default function LeaveRequests() {
   // Helper for team directory
   const getMemberLeaveDetails = (memberId) => {
     const memberApprovedLeaves = leaves.filter(l => {
-      const leaveUser = l.user?._id || l.user;
-      const userIdMatch = typeof leaveUser === 'object' ? leaveUser._id === memberId : leaveUser === memberId;
+      const leaveUser = l.user;
+      if (!leaveUser) return false;
+      const leaveUserId = typeof leaveUser === 'object' ? leaveUser._id : leaveUser;
+      const userIdMatch = leaveUserId === memberId;
       const yearMatch = new Date(l.date).getFullYear() === Number(selectedYear);
       return userIdMatch && yearMatch && l.status === 'APPROVED';
     });
@@ -133,8 +135,10 @@ export default function LeaveRequests() {
   // Filter leaves history table based on selectedUserId
   const filteredLeavesForTable = leaves.filter(l => {
     if (!selectedUserId) return true;
-    const leaveUser = l.user?._id || l.user;
-    return typeof leaveUser === 'object' ? leaveUser._id === selectedUserId : leaveUser === selectedUserId;
+    const leaveUser = l.user;
+    if (!leaveUser) return false;
+    const leaveUserId = typeof leaveUser === 'object' ? leaveUser._id : leaveUser;
+    return leaveUserId === selectedUserId;
   });
 
   return (

@@ -309,6 +309,9 @@ export default function Projects() {
               <option value="Photo Booth" />
               <option value="Album Printing" />
             </datalist>
+            <datalist id="cameramenList">
+              {users.map(u => <option key={u._id} value={u.name} />)}
+            </datalist>
             <div className="space-y-4">
             {formData.events.map((ev, i) => (
                 <div key={i} className="grid grid-cols-2 md:grid-cols-5 gap-3 p-5 bg-white/50 backdrop-blur-md border border-white/60 rounded-2xl shadow-sm hover:shadow-md transition-all relative group">
@@ -375,14 +378,14 @@ export default function Projects() {
                            </div>
                            <div>
                              <label className="block text-[10px] font-bold text-gray-500 mb-1">Camera Man</label>
-                             <select 
+                             <input 
+                               list="cameramenList"
+                               type="text"
+                               placeholder="Select or type..."
                                value={ss.cameraMan || ''} 
                                onChange={(e) => handleSubServiceChange(i, sIdx, 'cameraMan', e.target.value)} 
                                className="app-input w-full px-2 py-1 text-xs bg-white/80"
-                             >
-                               <option value="">Select Member</option>
-                               {users.map(u => <option key={u._id} value={u.name}>{u.name}</option>)}
-                             </select>
+                             />
                            </div>
                            <div>
                              <label className="block text-[10px] font-bold text-gray-500 mb-1">HDD</label>
