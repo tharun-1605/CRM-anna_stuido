@@ -320,6 +320,7 @@ export default function LeaveRequests() {
               <select value={leaveType} onChange={(e)=>setLeaveType(e.target.value)} className="w-full app-input px-4 py-2.5 text-sm">
                 <option value="Casual Leave">Casual Leave (12/year)</option>
                 <option value="Sick Leave">Sick Leave (8/year)</option>
+                <option value="Weekly Off">Weekly Off / Weak Off (Record Only)</option>
               </select>
             </div>
             <div>
@@ -373,7 +374,9 @@ export default function LeaveRequests() {
                       <td className="px-6 py-4 font-bold text-gray-700">{new Date(leave.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</td>
                       <td className="px-6 py-4 text-gray-600 font-medium">
                         <span className={`px-2.5 py-1 rounded-md text-xs font-bold border ${
-                          leave.type === 'Sick Leave' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                          leave.type === 'Sick Leave' ? 'bg-red-50 text-red-600 border-red-100' :
+                          (leave.type === 'Weekly Off' || leave.type === 'Week Off' || leave.type === 'Weak Off') ? 'bg-purple-50 text-purple-600 border-purple-100' :
+                          'bg-blue-50 text-blue-600 border-blue-100'
                         }`}>
                           {leave.type || 'Casual Leave'}
                         </span>
